@@ -16,7 +16,7 @@
  *  limitations under the License.
  */
 
-namespace Runtime;
+namespace Runtime.Core;
 
 use Runtime.rs;
 use Runtime.rtl;
@@ -29,27 +29,23 @@ use Runtime.CoreStruct;
 use Runtime.CoreProvider;
 use Runtime.Dict;
 use Runtime.Map;
-use Runtime.Message;
-use Runtime.MessageRPC;
 use Runtime.Vector;
-use Runtime.RuntimeConstant;
 use Runtime.RuntimeUtils;
-use Runtime.Annotations.Driver;
-use Runtime.Annotations.Entity;
 use Runtime.Annotations.IntrospectionClass;
 use Runtime.Annotations.IntrospectionInfo;
-use Runtime.Annotations.LambdaChain;
-use Runtime.Annotations.Provider;
 use Runtime.Exceptions.RuntimeException;
-use Runtime.Interfaces.BusInterface;
-use Runtime.Interfaces.ModuleDescriptionInterface;
+use Runtime.Core.Driver;
+use Runtime.Core.Entity;
+use Runtime.Core.LambdaChain;
+use Runtime.Core.Message;
+use Runtime.Core.MessageRPC;
+use Runtime.Core.Provider;
 
 
 struct Context extends CoreStruct
 {
 	/* Struct data */
 	string base_path = null;
-	string entrypoint = "";
 	Dict<string> enviroments = null;
 	Dict<var> settings = null;
 	Collection<string> modules = null;
@@ -67,8 +63,11 @@ struct Context extends CoreStruct
 	/* Private data */
 	private Vector logs = new Vector();
 	
-	/* Main class */
+	/* Entrypoint and main class */
+	string entry_point = "";
+	string main_module = "";
 	string main_class = "";
+	
 	
 	
 	/**
@@ -140,37 +139,108 @@ struct Context extends CoreStruct
 	 * @params Dict settings
 	 * @return Context
 	 */
-	static Context create(string main_module, Dict env = null)
+	static Context create(Dict env = null)
 	{
-		string main_module_class_name = "";
 		Dict settings = {};
+		
+		/* Context data */
+		Dict obj = {
+			"enviroments": env,
+			"settings": settings,
+			"modules": [],
+		};
+		
+		/* Create context */
+		Context ctx = static::newInstance(obj);
+		
+		return ctx;
+	}
+	
+	
+	
+	/**
+	 * Set main module
+	 */
+	static Context setMainModule(Context c, string main_module)
+	{
+		Dict settings = {};
+		string main_module_class_name = "";
 		
 		/* Get settings */
 		if (main_module)
 		{
 			main_module_class_name = main_module ~ ".ModuleDescription";
 			fn f = rtl::method(main_module_class_name, "appSettings");
-			settings = f(env);
+			settings = f(c.enviroments);
 		}
-		
-		/* Context data */
-		Dict obj = {
-			"enviroments": env,
-			"settings": settings,
-			"main_class": main_module_class_name,
-			"modules": [],
-		};
 		
 		/* Add main module */
 		if (main_module)
 		{
-			obj <= modules <= obj.item("modules").pushIm(main_module);
+			c <= modules <= c.modules.pushIm(main_module);
 		}
 		
-		/* Create context */
-		Context ctx = static::newInstance(obj);
+		/* Set main module */
+		c <= main_module <= main_module;
+		c <= main_class <= main_module_class_name;
 		
-		return ctx;
+		/* Set new settings */
+		c <= settings <= settings;
+		
+		return c;
+	}
+	
+	
+	
+	/**
+	 * Set entry point
+	 */
+	static Context setEntryPoint(Context c, string entry_point) =>
+		c.copy{ "entry_point": entry_point }
+	;
+	
+	
+	
+	/**
+	 * Run entry point
+	 */
+	static async Context run(Context c)
+	{
+		string entry_point = c.entry_point;
+		string main_class = c.main_class;
+		
+		/* Init app */
+		if (main_class != "")
+		{
+			fn appInit = rtl::method(main_class, "appInit");
+			c = appInit(c);
+		}
+		else
+		{
+			c = c::init(c);
+		}
+		
+		
+		/* Start app */
+		if (main_class != "")
+		{
+			fn appStart = rtl::method(main_class, "appStart");
+			c = await appStart(c);
+		}
+		else
+		{
+			c = await c::start(c);
+		}
+		
+		
+		/* Run entrypoint */
+		if (entry_point != "")
+		{
+			fn run = rtl::method(entry_point, "run");
+			c = await run(c);
+		}
+		
+		return c;
 	}
 	
 	
@@ -456,7 +526,7 @@ struct Context extends CoreStruct
 	static fn send(MessageRPC msg) =>
 		async MessageRPC (Context c) use (msg) =>
 			c
-				-> method getProvider(RuntimeConstant::BUS_INTERFACE, "default")
+				-> method getProvider(rtl::BUS_INTERFACE, "default")
 				-> await method sendMessage( msg )
 				-> monad MessageRPC::end
 			;
@@ -470,7 +540,7 @@ struct Context extends CoreStruct
 	static fn sendMessage(Dict items) =>
 		async MessageRPC (Context c) use (items) =>
 			c
-				-> method getProvider(RuntimeConstant::BUS_INTERFACE, "default")
+				-> method getProvider(rtl::BUS_INTERFACE, "default")
 				-> await method sendMessage( MessageRPC::create(items) )
 				-> monad MessageRPC::end
 			;
