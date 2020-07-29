@@ -16,13 +16,11 @@
  *  limitations under the License.
  */
  
-namespace Runtime;
+namespace Runtime.Core;
 
-use Runtime.rtl;
 use Runtime.CoreStruct;
 use Runtime.Collection;
 use Runtime.Map;
-use Runtime.RuntimeConstant;
 
 
 struct Message extends CoreStruct

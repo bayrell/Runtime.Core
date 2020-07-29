@@ -16,14 +16,13 @@
  *  limitations under the License.
  */
 
-namespace Runtime.Annotations;
+namespace Runtime.Core;
 
 use Runtime.rtl;
 use Runtime.CoreStruct;
-use Runtime.Interfaces.EntityInterface;
 
 
-struct Entity extends CoreStruct implements EntityInterface
+struct Entity extends CoreStruct
 {
 	string name = "";
 	string value = "";

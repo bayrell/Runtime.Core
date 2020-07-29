@@ -34,6 +34,7 @@ use Runtime.RuntimeUtils;
 use Runtime.Annotations.IntrospectionClass;
 use Runtime.Annotations.IntrospectionInfo;
 use Runtime.Exceptions.RuntimeException;
+use Runtime.Interfaces.ContextInterface;
 use Runtime.Core.Driver;
 use Runtime.Core.Entity;
 use Runtime.Core.LambdaChain;
@@ -42,7 +43,7 @@ use Runtime.Core.MessageRPC;
 use Runtime.Core.Provider;
 
 
-struct Context extends CoreStruct
+struct Context extends CoreStruct implements ContextInterface
 {
 	/* Struct data */
 	string base_path = null;
@@ -139,7 +140,7 @@ struct Context extends CoreStruct
 	 * @params Dict settings
 	 * @return Context
 	 */
-	static Context create(Dict env = null)
+	pure Context create(Dict env = null)
 	{
 		Dict settings = {};
 		
@@ -161,7 +162,7 @@ struct Context extends CoreStruct
 	/**
 	 * Set main module
 	 */
-	static Context setMainModule(Context c, string main_module)
+	pure Context setMainModule(Context c, string main_module)
 	{
 		Dict settings = {};
 		string main_module_class_name = "";
@@ -195,18 +196,17 @@ struct Context extends CoreStruct
 	/**
 	 * Set entry point
 	 */
-	static Context setEntryPoint(Context c, string entry_point) =>
+	pure Context setEntryPoint(Context c, string entry_point) =>
 		c.copy{ "entry_point": entry_point }
 	;
 	
 	
 	
 	/**
-	 * Run entry point
+	 * Prepare to run
 	 */
-	static async Context run(Context c)
+	static async Context prepare(Context c)
 	{
-		string entry_point = c.entry_point;
 		string main_class = c.main_class;
 		
 		/* Init app */
@@ -232,12 +232,23 @@ struct Context extends CoreStruct
 			c = await c::start(c);
 		}
 		
+		return c;
+	}
+	
+	
+	
+	/**
+	 * Run entry point
+	 */
+	static async Context run(Context c)
+	{
+		string entry_point = c.entry_point;
 		
 		/* Run entrypoint */
 		if (entry_point != "")
 		{
 			fn run = rtl::method(entry_point, "run");
-			c = await run(c);
+			await @run(c);
 		}
 		
 		return c;
@@ -771,7 +782,7 @@ struct Context extends CoreStruct
 		{
 			CoreStruct item1 = entities.item(i);
 			string item1_class_name = item1.getClassName();
-			if (item1_class_name == "Runtime.Annotations.Entity")
+			if (item1_class_name == "Runtime.Core.Entity")
 			{
 				string class_name = (item1.value != "") ? item1.value : item1.name;
 				IntrospectionClass info = RuntimeUtils::getClassIntrospection(class_name);
@@ -781,7 +792,7 @@ struct Context extends CoreStruct
 					{
 						CoreStruct item2 = info.class_info.item(j);
 						string item2_class_name = item2.getClassName();
-						if (item2 instanceof Entity and item2_class_name != "Runtime.Annotations.Entity")
+						if (item2 instanceof Entity and item2_class_name != "Runtime.Core.Entity")
 						{
 							item2 = item2.copy({ "name": class_name });
 							e.push(item2);

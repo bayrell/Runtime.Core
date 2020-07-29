@@ -16,18 +16,14 @@
  *  limitations under the License.
  */
  
-namespace Runtime;
+namespace Runtime.Core;
 
 use Runtime.CoreStruct;
-use Runtime.Collection;
-use Runtime.Map;
-use Runtime.Message;
 use Runtime.Monad;
-use Runtime.rtl;
 use Runtime.RuntimeConstant;
-use Runtime.Session;
 use Runtime.Exceptions.ApiException;
 use Runtime.Exceptions.RuntimeException;
+use Runtime.Core.Message;
 
 
 struct MessageRPC<primitive> extends Message

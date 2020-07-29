@@ -16,7 +16,7 @@
  *  limitations under the License.
  */
 
-namespace Runtime.Web;
+namespace Runtime.Core;
 
 use Runtime.Annotations.Manager;
 use Runtime.Annotations.LambdaChain;
@@ -58,7 +58,6 @@ class ModuleDescription implements
 	pure Dict<string> requiredModules() =>
 	{
 		'Runtime': '>=0.3',
-		'Runtime.Web': '*',
 	};
 	
 	
@@ -69,46 +68,19 @@ class ModuleDescription implements
 	 */
 	pure Collection<string> assets() => 
 	[
-		"Runtime.Web/ApiContainer",
-		"Runtime.Web/Cookie",
-		"Runtime.Web/RenderContainer",
-		"Runtime.Web/RenderHelper",
-		"Runtime.Web/Request",
-		"Runtime.Web/Response",
-		"Runtime.Web/Annotations/ApiList",
-		"Runtime.Web/Annotations/ApiMethod",
-		"Runtime.Web/Annotations/Route",
-		"Runtime.Web/Annotations/RouteList",
-		"Runtime.Web/Annotations/RouteMiddleware",
-		"Runtime.Web/Annotations/Template",
-		"Runtime.Web/Events/UIEvent",
-		"Runtime.Web/Events/WebEvent",
-		"Runtime.Web/Events/BlurEvent",
-		"Runtime.Web/Events/ChangeEvent",
-		"Runtime.Web/Events/FocusEvent",
-		"Runtime.Web/Events/KeyboardEvent",
-		"Runtime.Web/Events/KeyDownEvent",
-		"Runtime.Web/Events/KeyPressEvent",
-		"Runtime.Web/Events/KeyUpEvent",
-		"Runtime.Web/Events/MouseEvent",
-		"Runtime.Web/Events/MouseClickEvent",
-		"Runtime.Web/Events/MouseContextMenuEvent",
-		"Runtime.Web/Events/MouseDoubleClickEvent",
-		"Runtime.Web/Events/MouseDownEvent",
-		"Runtime.Web/Events/MouseEnterEvent",
-		"Runtime.Web/Events/MouseLeaveEvent",
-		"Runtime.Web/Events/MouseMoveEvent",
-		"Runtime.Web/Events/MouseOutEvent",
-		"Runtime.Web/Events/MouseOverEvent",
-		"Runtime.Web/Events/MouseUpEvent",
-		"Runtime.Web/Events/MouseWheelEvent",
-		"Runtime.Web/Frontend/Component",
-		"Runtime.Web/Frontend/Layout",
-		"Runtime.Web/Frontend/LayoutModel",
-		"Runtime.Web/Frontend/SeoModel",
-		"Runtime.Web/RedirectResponse",
-		"Runtime.Web/JsonResponse",
-		"Runtime.Web/ModuleDescription",
+		"Runtime.Core/Context",
+		"Runtime.Core/CoreDriver",
+		"Runtime.Core/CoreEvent",
+		"Runtime.Core/CoreProvider",
+		"Runtime.Core/Entity",
+		"Runtime.Core/Driver",
+		"Runtime.Core/LambdaChain",
+		"Runtime.Core/LambdaChainDeclare",
+		"Runtime.Core/Message",
+		"Runtime.Core/MessageRPC",
+		"Runtime.Core/MessageSession",
+		"Runtime.Core/ModuleDescription",
+		"Runtime.Core/Provider",
 	];
 	
 	
@@ -118,9 +90,6 @@ class ModuleDescription implements
 	 */
 	pure Collection<Dict> entities() => 
 	[
-		/* Declare Layout Chain */
-		new LambdaChainDeclare{ "name": RenderHelper::LAYOUT_CHAIN },
-		new LambdaChainDeclare{ "name": RenderHelper::PATTERN_CHAIN },
 	];
 	
 	
