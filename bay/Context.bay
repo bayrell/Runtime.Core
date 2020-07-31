@@ -54,7 +54,6 @@ struct Context extends CoreStruct implements ContextInterface
 	Collection<string> cli_args = null;
 	Dict<CoreDriver> drivers = null;
 	Dict<CoreStruct> providers = null;
-	Dict<var> tags = null;
 	
 	/* Variable data */
 	bool initialized = false;
@@ -97,11 +96,10 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Returns enviroment by eky
 	 */
-	pure fn env(string key, var def_value = "") => 
-		string (Context c) use (key, def_value) =>
-			c
-				-> attr "enviroments"
-				-> lib::get(key, def_value)
+	fn env(string key, var def_value = "") =>
+		this
+		|> attr "enviroments"
+		|> lib::get(key, def_value)
 	;
 	
 	
@@ -110,12 +108,11 @@ struct Context extends CoreStruct implements ContextInterface
 	 * Returns settings
 	 * @return Dict<string>
 	 */
-	pure fn config(Collection items, primitive d = null) =>
-		var (Context c) use (items, d) =>
-			c
-				-> attr "settings"
-				-> lib::get("config", null)
-				-> lib::attr(items, d)
+	fn config(Collection items, primitive d = null) =>
+		this
+		|> attr "settings"
+		|> lib::get("config", null)
+		|> lib::attr(items, d)
 	;
 	
 	
@@ -123,11 +120,10 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Returns docker secret key
 	 */
-	pure fn secret(string key) =>
-		string (Context c) use (key) =>
-			c
-				-> attr "settings"
-				-> lib::get(key, "")
+	fn secret(string key) =>
+		this
+		|> attr "settings"
+		|> lib::get(key, "")
 	;
 	
 	
@@ -278,7 +274,7 @@ struct Context extends CoreStruct implements ContextInterface
 		c <= entities <= entities;
 		
 		/* Extend entities */
-		entities = c -> method chain("Runtime.Entities", [c, entities]);
+		entities = c.chain("Runtime.Entities", [c, entities]);
 		entities = static::extendEntities(c, entities);
 		entities = static::getRequiredEntities(entities);
 		
@@ -320,7 +316,7 @@ struct Context extends CoreStruct implements ContextInterface
 	
 	
 	
-	/* ---------------------- Driver -------------------- */
+	/* ---------------- Driver & Provider --------------- */
 	
 	/**
 	 * Get driver
@@ -328,22 +324,9 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @params string driver_name
 	 * @return Runtime.anager
 	 */
-	pure fn getDriver(string driver_name)
-	{
-		return CoreDriver(Context c) use (driver_name)
-		{
-			if (c.drivers.has(driver_name))
-			{
-				return c.drivers.item(driver_name);
-			}
-			
-			return null;
-		}
-	}
+	fn getDriver(string driver_name) => this.drivers.get(driver_name, null);
 	
 	
-	
-	/* --------------------- Provider ------------------- */
 	
 	/**
 	 * Create provider
@@ -351,41 +334,37 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @params string provider_name
 	 * @return CoreProvider
 	 */
-	pure fn createProvider(string provider_name, Dict params = null, string settings_name = "default")
+	fn createProvider(string provider_name, Dict params = null, string settings_name = "default")
 	{
-		return CoreStruct (Context c) use (provider_name, params, settings_name)
+		CoreProvider provider = null;
+		if (this.providers.has(provider_name))
 		{
-			CoreProvider provider = null;
-			if (c.providers.has(provider_name))
+			Provider info = this.providers.item(provider_name);
+			if (info.kind == Provider::KIND_INTERFACE)
 			{
-				Provider info = c.providers.item(provider_name);
-				if (info.kind == Provider::KIND_INTERFACE)
-				{
-					throw new RuntimeException("Provider " ~ provider_name ~ " does not declared");
-				}
-				string class_name = info.className();
-				
-				/* Set default params */
-				if (params == null)
-				{
-					params = rtl::attr(c.settings, ["providers", class_name, settings_name]);
-				}
-				if (params == null) params = {};
-				
-				provider = rtl::newInstance(class_name, [params]);
-				provider = c -> method chain(class_name, [provider]);
-				if (provider_name != class_name)
-				{
-					provider = c -> method chain(provider_name, [provider]);
-				}
+				throw new RuntimeException("Provider " ~ provider_name ~ " does not declared");
 			}
-			else
-			{
-				throw new RuntimeException("Provider " ~ provider_name ~ " not found");
-			}
+			string class_name = info.className();
 			
-			return provider;
+			/* Set default params */
+			if (params == null)
+			{
+				params = rtl::attr(this.settings, ["providers", class_name, settings_name]);
+			}
+			if (params == null) params = {};
+			
+			provider = rtl::newInstance(class_name, [params]);
+			provider = this.chain(class_name, [provider]);
+			if (provider_name != class_name)
+			{
+				provider = this.chain(provider_name, [provider]);
+			}
 		}
+		else
+		{
+			throw new RuntimeException("Provider " ~ provider_name ~ " not found");
+		}
+		return provider;
 	}
 	
 	
@@ -396,8 +375,8 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @params string provider_name
 	 * @return CoreProvider
 	 */
-	pure fn getProvider(string provider_name, string settings_name = "default") =>
-		static::createProvider(provider_name, null, settings_name)
+	fn getProvider(string provider_name, string settings_name = "default") =>
+		this.createProvider(provider_name, null, settings_name)
 	;
 	
 	
@@ -407,44 +386,41 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Apply Lambda Chain
 	 */
-	static fn chain(string chain_name, Dict args)
+	fn chain(string chain_name, Dict args)
 	{
-		return var (Context c) use (chain_name, args)
+		Collection<CoreStruct> entities = this.entities.filter
+		(
+			bool (CoreStruct item) use (chain_name) =>
+				item instanceof LambdaChain and
+				item.name == chain_name and
+				item.is_async == false
+		);
+		entities = entities.sortIm
+		(
+			int (LambdaChain a, LambdaChain b) => a.pos > b.pos
+		);
+		
+		for (int i=0; i<entities.count(); i++)
 		{
-			Collection<CoreStruct> entities = c.entities.filter
-			(
-				bool (CoreStruct item) use (chain_name) => 
-					item instanceof LambdaChain and 
-					item.name == chain_name and 
-					item.is_async == false
-			);
-			entities = entities.sortIm
-			(
-				int (LambdaChain a, LambdaChain b) => a.pos > b.pos
-			);
-			
-			for (int i=0; i<entities.count(); i++)
+			LambdaChain item = entities.item(i);
+			string item_chain_name = item.chain;
+			if (item_chain_name != "")
 			{
-				LambdaChain item = entities.item(i);
-				string item_chain_name = item.chain;
-				if (item_chain_name != "")
-				{
-					var res = c.chain(item_chain_name, args);
-					args = args.setIm(args.count() - 1, res);
-				}
-				else
-				{
-					Collection arr = rs::split("::", item.value);
-					string class_name = arr.get(0, "");
-					string method_name = arr.get(1, "");
-					fn f = rtl::method(class_name, method_name);
-					var res = rtl::apply(f, args);
-					args = args.setIm(args.count() - 1, res);
-				}
+				var res = this.chain(item_chain_name, args);
+				args = args.setIm(args.count() - 1, res);
 			}
-			var res = args.last();
-			return res;
+			else
+			{
+				Collection arr = rs::split("::", item.value);
+				string class_name = arr.get(0, "");
+				string method_name = arr.get(1, "");
+				fn f = rtl::method(class_name, method_name);
+				var res = rtl::apply(f, args);
+				args = args.setIm(args.count() - 1, res);
+			}
 		}
+		var res = args.last();
+		return res;
 	}
 	
 	
@@ -452,52 +428,49 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Apply Lambda Chain Await
 	 */
-	static async fn chainAwait(string chain_name, Dict args)
+	async fn chainAwait(string chain_name, Dict args)
 	{
-		return var (Context c) use (chain_name, args)
+		Collection<CoreStruct> entities = this.entities.filter
+		(
+			bool (CoreStruct item) use (chain_name) =>
+				item instanceof LambdaChain and
+				item.name == chain_name
+		);
+		entities = entities.sortIm
+		(
+			int (LambdaChain a, LambdaChain b) => a.pos > b.pos
+		);
+		
+		for (int i=0; i<entities.count(); i++)
 		{
-			Collection<CoreStruct> entities = c.entities.filter
-			(
-				bool (CoreStruct item) use (chain_name) => 
-					item instanceof LambdaChain and 
-					item.name == chain_name
-			);
-			entities = entities.sortIm
-			(
-				int (LambdaChain a, LambdaChain b) => a.pos > b.pos
-			);
-			
-			for (int i=0; i<entities.count(); i++)
+			LambdaChain item = entities.item(i);
+			string item_chain_name = item.chain;
+			if (item_chain_name != "")
 			{
-				LambdaChain item = entities.item(i);
-				string item_chain_name = item.chain;
-				if (item_chain_name != "")
+				var res = await this.chainAwait(item_chain_name, args);
+				args = args.setIm(args.count() - 1, res);
+			}
+			else
+			{
+				Collection arr = rs::split("::", item.value);
+				string class_name = arr.get(0, "");
+				string method_name = arr.get(1, "");
+				fn f = rtl::method(class_name, method_name);
+				
+				if (item.is_async)
 				{
-					var res = await static::chainAwait(item_chain_name, args);
+					var res = await rtl::apply(f, args);
 					args = args.setIm(args.count() - 1, res);
 				}
 				else
 				{
-					Collection arr = rs::split("::", item.value);
-					string class_name = arr.get(0, "");
-					string method_name = arr.get(1, "");
-					fn f = rtl::method(class_name, method_name);
-					
-					if (item.is_async)
-					{
-						var res = await rtl::apply(f, args);
-						args = args.setIm(args.count() - 1, res);
-					}
-					else
-					{
-						var res = rtl::apply(f, args);
-						args = args.setIm(args.count() - 1, res);
-					}
+					var res = rtl::apply(f, args);
+					args = args.setIm(args.count() - 1, res);
 				}
 			}
-			var res = args.last();
-			return res;
 		}
+		var res = args.last();
+		return res;
 	}
 	
 	
@@ -510,7 +483,7 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @params string locale - Different locale. Default "".
 	 * @return string - translated string
 	 */
-	pure fn translate(Context c, string space, string message, Map params = null, string locale = "")
+	fn translate(string space, string message, Map params = null, string locale = "")
 	{
 		message = (params == null) ? message :
 			params.reduce
@@ -534,27 +507,25 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @param Message msg
 	 * @return Message
 	 */ 
-	static fn send(MessageRPC msg) =>
-		async MessageRPC (Context c) use (msg) =>
-			c
-				-> method getProvider(rtl::BUS_INTERFACE, "default")
-				-> await method sendMessage( msg )
-				-> monad MessageRPC::end
-			;
-			
+	fn send(MessageRPC msg) =>
+		this.getProvider(rtl::BUS_INTERFACE, "default")
+		|> await method sendMessage( msg )
+		|> monad MessageRPC::end
+	;
+	
+	
 	
 	/**
 	 * Send rpc message
 	 * @param Dict items
 	 * @return Message
 	 */ 
-	static fn sendMessage(Dict items) =>
-		async MessageRPC (Context c) use (items) =>
-			c
-				-> method getProvider(rtl::BUS_INTERFACE, "default")
-				-> await method sendMessage( MessageRPC::create(items) )
-				-> monad MessageRPC::end
-			;
+	fn sendMessage(Dict items) =>
+		this.getProvider(rtl::BUS_INTERFACE, "default")
+		|> await method sendMessage( MessageRPC::create(items) )
+		|> monad MessageRPC::end
+	;
+	
 	
 	
 	/* ---------------------- Logs ---------------------- */
@@ -564,12 +535,9 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @param string message
 	 * @param int loglevel
 	 */
-	static fn debug(string message, int loglevel = 0)
+	fn debug(string message, int loglevel = 0)
 	{
-		return Message (Context c) use (message, loglevel)
-		{
-			this.logs.push(message ~ "\n");
-		}
+		this.logs.push(message ~ "\n");
 	}
 	
 	
@@ -579,19 +547,16 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @param string message
 	 * @param int loglevel
 	 */
-	static fn log_timer(string message, int loglevel = 0)
+	fn log_timer(string message, int loglevel = 0)
 	{
-		return void (Context c) use (message, loglevel)
-		{
-			int time = c -> method utime;
-			time = time - c.start_time;
-			string s = "[" ~ rtl::round(time * 1000) ~ "]ms " ~ message ~ "\n";
-			c.logs.push(s);
-			#switch
-			#case ifcode PHP then
-			/*if (isset($_GET['aaa']) && $_GET['aaa'] == 'bbb') var_dump($s);*/
-			#endswitch
-		}
+		int time = this.utime;
+		time = time - this.start_time;
+		string s = "[" ~ rtl::round(time * 1000) ~ "]ms " ~ message ~ "\n";
+		this.logs.push(s);
+		#switch
+		#case ifcode PHP then
+		/*if (isset($_GET['aaa']) && $_GET['aaa'] == 'bbb') var_dump($s);*/
+		#endswitch
 	}
 	
 	
@@ -601,19 +566,16 @@ struct Context extends CoreStruct implements ContextInterface
 	 * @param var v
 	 * @param int loglevel
 	 */
-	static fn dump(var v, int loglevel = 0)
+	fn dump(var v, int loglevel = 0)
 	{
-		return void (Context c) use (v, loglevel)
-		{
-			#switch
-			#case ifcode PHP then
-			ob_start();
-			var_dump($v);
-			$content = ob_get_contents();
-			ob_end_clean();
-			$this->logs->push($content);
-			#endswitch
-		}
+		#switch
+		#case ifcode PHP then
+		ob_start();
+		var_dump($v);
+		$content = ob_get_contents();
+		ob_end_clean();
+		$this->logs->push($content);
+		#endswitch
 	}
 	
 	
@@ -622,12 +584,9 @@ struct Context extends CoreStruct implements ContextInterface
 	 * Append logs message
 	 * @param Collection<string> logs
 	 */
-	static fn logAppend(Collection<string> logs)
+	fn logAppend(Collection<string> logs)
 	{
-		return void (Context c) use (logs)
-		{
-			/*this.logs.appendVector(logs);*/
-		}
+		/*this.logs.appendVector(logs);*/
 	}
 	
 	
@@ -635,41 +594,10 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Return logs
 	 */
-	static fn getLogs()
+	fn getLogs()
 	{
-		return Collection<string> (Context c)
-		{
-			/*return this.logs.toCollection();*/
-			return [];
-		}
-	}
-	
-	
-	
-	/* ---------------------- Tags ---------------------- */
-	
-	/**
-	 * Set tag
-	 */
-	static fn setTagIm(string tag_name, var value)
-	{
-		return Context(Context c) use (tag_name, value)
-		{
-			return c.copy{ "tags": c.tags.setIm(c, tag_name, value) };
-		}
-	}
-	
-	
-	
-	/**
-	 * Returns tag
-	 */
-	static fn getTag(string tag_name)
-	{
-		return Context(Context c) use (tag_name)
-		{
-			return c.tags.get(c, tag_name, null);
-		}
+		/*return this.logs.toCollection();*/
+		return [];
 	}
 	
 	
@@ -679,7 +607,7 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Returns unix timestamp
 	 */
-	static int time()
+	int time()
 	{
 		#switch
 		#case ifcode PHP then
@@ -692,7 +620,7 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Returns unix timestamp
 	 */
-	static int utime()
+	int utime()
 	{
 		#switch
 		#case ifcode PHP then
@@ -845,10 +773,10 @@ struct Context extends CoreStruct implements ContextInterface
 			if (class_name == "") class_name = item.name;
 			
 			CoreDriver driver = rtl::newInstance(class_name, []);
-			driver = c -> method chain(class_name, [driver]);
+			driver = c.chain(class_name, [driver]);
 			if (class_name != driver_name)
 			{
-				driver = c -> method chain(driver_name, [driver]);
+				driver = c.chain(driver_name, [driver]);
 			}
 			
 			drivers.set(item.name, driver);
