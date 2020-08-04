@@ -386,14 +386,14 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Apply Lambda Chain
 	 */
-	fn chain(string chain_name, Dict args)
+	fn chain(string chain_name, Collection args)
 	{
 		Collection<CoreStruct> entities = this.entities.filter
 		(
 			bool (CoreStruct item) use (chain_name) =>
 				item instanceof LambdaChain and
 				item.name == chain_name and
-				item.is_async == false
+				item.is_await == false
 		);
 		entities = entities.sortIm
 		(
@@ -428,7 +428,7 @@ struct Context extends CoreStruct implements ContextInterface
 	/**
 	 * Apply Lambda Chain Await
 	 */
-	async fn chainAwait(string chain_name, Dict args)
+	async fn chainAwait(string chain_name, Collection args)
 	{
 		Collection<CoreStruct> entities = this.entities.filter
 		(
