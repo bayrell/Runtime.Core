@@ -72,11 +72,14 @@ class ObjectManager extends CoreObject
 	{
 		if (this.mutex_objects) /* safe */
 		{
-			if (object_name == "") object_name = obj.getObjectName();
-			if (not this.drivers.has(object_name))
+			if (obj instanceof CoreObject)
 			{
-				this.objects.set(object_name, obj);
-				obj.manager = obj;
+				if (object_name == "") object_name = obj.getObjectName();
+				if (not this.drivers.has(object_name))
+				{
+					this.objects.set(object_name, obj);
+					obj.manager = obj;
+				}
 			}
 		}
 	}
