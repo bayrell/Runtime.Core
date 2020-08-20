@@ -15,12 +15,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
+ 
 namespace Runtime.Core;
 
-use Runtime.CoreStruct;
+use Runtime.Core.Message;
+use Runtime.Core.RemoteCallResponse;
 
 
-struct CoreProvider extends CoreStruct
+interface BusDriverInterface
 {
+	
+	/**
+	 * Send message
+	 * @return string
+	 */
+	async void sendMessage(Message msg);
+	
+	
+	
+	/**
+	 * Send message
+	 * @return string
+	 */
+	async RemoteCallResponse remoteBusCall(Dict items);
+	
 }

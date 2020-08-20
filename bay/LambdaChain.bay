@@ -18,12 +18,12 @@
 
 namespace Runtime.Core;
 
-use Runtime.CoreStruct;
+use Runtime.BaseStruct;
 use Runtime.rs;
 use Runtime.Interfaces.EntityInterface;
 
 
-struct LambdaChain extends CoreStruct implements EntityInterface
+struct LambdaChain extends BaseStruct implements EntityInterface
 {	
 	string name = "";
 	string value = "";

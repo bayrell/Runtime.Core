@@ -15,14 +15,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
+ 
 namespace Runtime.Core;
 
-use Runtime.Core.Entity;
+use Runtime.Core.BaseEvent;
 
 
-struct Provider extends Entity
+struct RemoteCallEvent extends BaseEvent
 {
-	static const string KIND_INTERFACE = "interface";
-	string kind = "";
+	string object_name = "";
+	string space_name = "";
+	string method_name = "";
+	primitive data = null;
 }

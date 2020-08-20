@@ -18,7 +18,7 @@
 
 namespace Runtime.Core;
 
-use Runtime.CoreStruct;
+use Runtime.BaseStruct;
 use Runtime.Dict;
 use Runtime.Map;
 use Runtime.rs;

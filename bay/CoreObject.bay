@@ -15,56 +15,59 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
- 
+
 namespace Runtime.Core;
 
 use Runtime.BaseObject;
-use Runtime.BaseStruct;
-use Runtime.Collection;
-use Runtime.Map;
+use Runtime.Core.Message;
+use Runtime.Core.ObjectManager;
 
 
-class Message<T> extends BaseObject
+class CoreObject extends BaseObject
 {
-	protected string message_id = "";
+	
 	protected string object_name = "";
-	protected bool is_cancel = false;
-	protected T data = null;
-	public Map tags = null;
+	CoreObject parent = null;
+	Vector<CoreObject> childs = null;
+	ObjectManager manager = null;
 	
 	
 	/**
-	 * Read property
+	 * Returns object name
 	 */
-	string getMessageID() => this.message_id;
-	string getObjectName() => this.object_name;
-	string isCancel() => this.is_cancel;
-	T getData() => this.data;
-	
-	
-	
-	/**
-	 * Cancel Message
-	 */
-	void cancel()
-	{
-		this.is_cancel = true;
-	}
+	public string getObjectName() => this.uq_object_name;
 	
 	
 	
 	/** 
 	 * Constructor
 	 */
-	public void constructor(T data, string object_name = "", string message_id = "")
-	{
-		parent();
+	public void constructor(string object_name = "")
+	{		
+		/* Init object */
+		this._init();
 		
-		/* Set property */
-		this.data = data;
-		this.object_name = object_name;
-		this.message_id = (message_id != "") ? message_id : rtl::unique();
-		this.tags = new Map();
+		/* Set object name */
+		this.object_name = (object_name != "") ? object_name : this.getClassName() ~ "." ~ rtl::unique();
+		this.childs = new Vector<CoreObject>();
 	}
 	
+	
+	
+	/**
+	 * Handle message
+	 */
+	public async void handleMessage(Message msg)
+	{
+	}
+	
+	
+	
+	/**
+	 * Set parent
+	 */
+	void setParent(CoreObject child_obj, CoreObject parent_obj)
+	{
+		this.manager.setParent(child_obj, parent_obj);
+	}
 }

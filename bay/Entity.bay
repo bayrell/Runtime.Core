@@ -19,10 +19,10 @@
 namespace Runtime.Core;
 
 use Runtime.rtl;
-use Runtime.CoreStruct;
+use Runtime.BaseStruct;
 
 
-struct Entity extends CoreStruct
+struct Entity extends BaseStruct
 {
 	string name = "";
 	string value = "";

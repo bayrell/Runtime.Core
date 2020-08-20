@@ -18,22 +18,19 @@
  
 namespace Runtime.Core;
 
-use Runtime.CoreStruct;
+use Runtime.BaseStruct;
 use Runtime.Monad;
-use Runtime.RuntimeConstant;
-use Runtime.Exceptions.ApiException;
-use Runtime.Exceptions.RuntimeException;
+use Runtime.Core.ApiException;
 use Runtime.Core.Message;
+use Runtime.Exceptions.RuntimeException;
 
 
-struct MessageRPC<primitive> extends Message
+struct RemoteCallResponse extends BaseStruct
 {
-	/* Data */
-	string uri = "";
-	string api_name = "";
+	/* Dest */
+	string object_name = "";
 	string space_name = "";
 	string method_name = "";
-	Dict data = null;
 	
 	/* Result */
 	int code = 0;
@@ -41,16 +38,18 @@ struct MessageRPC<primitive> extends Message
 	string error = "";
 	string error_name = "";
 	string error_trace = "";
-	primitive response = null;
 	Collection<string> logs = null;	
 	bool have_answer = false;
 	
-		
+	/* Data */
+	primitive response = null;
+	
+	
 	/**
 	 * Returns true if success
 	 * @return bool
 	 */
-	pure bool isSuccess(Message msg) => msg.have_answer and msg.code >= RuntimeConstant::ERROR_OK;
+	pure bool isSuccess(Message msg) => msg.have_answer and msg.code >= rtl::ERROR_OK;
 	
 	
 	
@@ -59,15 +58,14 @@ struct MessageRPC<primitive> extends Message
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure fn success(primitive response, string message = "", int code = 1) =>
-		Message (Message msg) use (response, message, code) =>
-			msg.copy
-			{
-				"code": code,
-				"error": "",
-				"success_message": message,
-				"response": response,
-			}
+	pure fn success(Message msg, primitive response, string message = "", int code = 1) =>
+		msg.copy
+		{
+			"code": code,
+			"error": "",
+			"success_message": message,
+			"response": response,
+		}
 	;
 	
 	
@@ -77,15 +75,14 @@ struct MessageRPC<primitive> extends Message
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure fn fail(primitive response, string error = "", int code = -1, string error_name = "") =>
-		Message (Message msg) use (response, error, error_name, code) =>
-			msg.copy
-			{
-				"code": code,
-				"error": error,
-				"error_name": error_name,
-				"response": response,
-			}
+	pure fn fail(Message msg, primitive response, string error = "", int code = -1, string error_name = "") =>
+		msg.copy
+		{
+			"code": code,
+			"error": error,
+			"error_name": error_name,
+			"response": response,
+		}
 	;
 	
 	
@@ -95,37 +92,35 @@ struct MessageRPC<primitive> extends Message
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure fn exception(RuntimeException e) =>
-		Message (Message msg) use (e)
+	pure fn exception(Message msg, RuntimeException e)
+	{
+		msg = msg.copy
 		{
-			msg = msg.copy
-			{
-				"code": e.getErrorCode(),
-				"error": e.getErrorMessage(),
-				"error_name": e.getClassName(),
-				"response": null,
-			};
-			
-			if (e instanceof ApiException)
-			{
-				msg <= response <= e.response;
-			}
-			
-			return msg;
+			"code": e.getErrorCode(),
+			"error": e.getErrorMessage(),
+			"error_name": e.getClassName(),
+			"response": null,
+		};
+		
+		if (e instanceof ApiException)
+		{
+			msg <= response <= e.response;
 		}
-	;
+		
+		return msg;
+	}
 	
 	
 	
 	/**
 	 * End pipe
 	 */
-	pure MessageRPC end(Monad m)
+	pure Message end(Monad m)
 	{
 		if (m.err == null) return m;
 		return new Monad
 		(
-			new MessageRPC
+			new Message
 			{
 				"error": m.err.getErrorMessage(),
 				"error_name": m.err.getClassName(),

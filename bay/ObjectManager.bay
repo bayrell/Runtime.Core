@@ -1,0 +1,282 @@
+/*!
+ *  Bayrell Runtime Library
+ *
+ *  (c) Copyright 2016-2020 "Ildar Bikmamatov" <support@bayrell.org>
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
+namespace Runtime.Core;
+
+use Runtime.Mutex;
+use Runtime.BaseObject;
+use Runtime.BaseStruct;
+use Runtime.Core.CoreDriver;
+use Runtime.Core.CoreEvent;
+use Runtime.Core.CoreObject;
+use Runtime.Core.Driver;
+use Runtime.Core.Message;
+use Runtime.Core.RemoteCallEvent;
+use Runtime.Core.RemoteCallResponse;
+
+
+class ObjectManager extends CoreObject
+{
+	protected Map<CoreObject> objects = null;
+	protected Map<CoreObject> drivers = null;
+	protected Vector<Message> messages = null;
+	protected Mutex mutex_messages = null;
+	protected Mutex mutex_objects = null;
+	protected Mutex mutex_process = null;
+	
+	
+	/**
+	 * Constructor
+	 */
+	void constructor()
+	{
+		parent();
+		
+		/* Create object */
+		this.objects = new Map<CoreObject>();
+		this.drivers = new Map<CoreObject>();
+		this.messages = new Vector<Message>();
+		this.mutex_messages = new Mutex();
+		this.mutex_objects = new Mutex();
+		this.mutex_process = new Mutex();
+		
+		/* Register self */
+		this.objects.set(this.getClassName(), this);
+		this.drivers.set(this.getClassName(), this);
+		this.objects.set("default:object_manager", this);
+		this.drivers.set("default:object_manager", this);
+		this.manager = this;
+	}
+	
+	
+	
+	/**
+	 * Add object
+	 */
+	void addObject(CoreObject obj, string object_name = "")
+	{
+		if (this.mutex_objects) /* safe */
+		{
+			if (object_name == "") object_name = obj.getObjectName();
+			if (not this.drivers.has(object_name))
+			{
+				this.objects.set(object_name, obj);
+				obj.manager = obj;
+			}
+		}
+	}
+	
+	
+	
+	/**
+	 * Get object
+	 */
+	CoreObject getObject(string object_name)
+	{
+		CoreObject obj = null;
+		if (this.mutex_objects) /* safe */
+		{
+			obj = this.objects.get(object_name, null);
+		}
+		return obj;
+	}
+	
+	
+	
+	/**
+	 * Get driver
+	 */
+	CoreDriver getDriver(string driver_name)
+	{
+		CoreObject obj = null;
+		if (this.mutex_objects) /* safe */
+		{
+			obj = this.drivers.get(driver_name, null);
+		}
+		return obj;
+	}
+	
+	
+	
+	/**
+	 * Remove object
+	 */
+	void removeObject(string object_name)
+	{
+		if (this.mutex_objects) /* safe */
+		{
+			if (not this.drivers.has(object_name))
+			{
+				this.objects.remove(object_name);
+			}
+		}
+	}
+	
+	
+	
+	/**
+	 * Start object manager
+	 */
+	async void startManager(Collection<BaseStruct> entities)
+	{
+		Collection<BaseStruct> drivers = entities.filter
+		(
+			bool (BaseStruct item) => item instanceof Driver
+		);
+		
+		for (int i=0; i<drivers.count(); i++)
+		{
+			Driver driver_entity = drivers.item(i);
+			
+			string driver_name = driver_entity.name;
+			string class_name = driver_entity.value;
+			if (class_name == "") class_name = driver_entity.name;
+			
+			CoreDriver driver = rtl::newInstance(class_name, []);
+			driver = @.chain(class_name, [driver]);
+			if (class_name != driver_name)
+			{
+				driver = @.chain(driver_name, [driver]);
+			}
+			
+			if (this.mutex_objects) /* safe */
+			{
+				this.objects.set(driver_name, driver);
+				this.drivers.set(driver_name, driver);
+				driver.manager = this;
+			}
+			
+			await driver.startDriver();
+		}
+		
+		rtl::runThread( method this.processMessages );
+	}
+	
+	
+	
+	/**
+	 * Send message
+	 * @param Message msg
+	 * @return Message
+	 */ 
+	async void sendMessage(Message msg)
+	{
+		if (this.mutex_messages) /* safe */
+		{
+			this.messages.push(msg);
+		}
+		this.mutex_process.unlock();
+	}
+	
+	
+	
+	/**
+	 * Send message
+	 * @param Message msg
+	 * @return Message
+	 */ 
+	async RemoteCallResponse remoteCall(Dict items)
+	{
+		/* Create message */
+		RemoteCallEvent event = RemoteCallEvent::create(items);
+		Message msg = new Message(event, event.object_name);
+		
+		/* Send message */
+		await this.sendMessage(msg);
+		
+		/* Wait message */
+		RemoteCallResponse response = await this.waitResponse(msg);
+		
+		/* Return response */
+		return response;
+	}
+	
+	
+	
+	/**
+	 * Process messages
+	 */
+	async void processMessages()
+	{
+		bool is_run = @.getRun();
+		while (is_run)
+		{
+			if (this.message.count() == 0)
+			{
+				await this.mutex_process.waitAsync();
+			}
+			await this.handleMessages();
+			this.mutex_process.lock();
+		}
+	}
+	
+	
+	
+	/**
+	 * Handle messages
+	 */
+	async void handleMessages()
+	{
+		while (this.message.count() > 0)
+		{
+			Message msg = null;
+			if (this.mutex_messages) /* safe */
+			{
+				msg = this.message.pop();
+			}
+			if (msg == null)
+			{
+				return;
+			}
+			
+			CoreObject obj = this.getObject(msg.object_name);
+			while (obj != null)
+			{
+				await obj.handleMessage(msg);
+				obj = obj.parent;
+			}
+		}
+	}
+	
+	
+	
+	/**
+	 * Set parent
+	 */
+	void setParent(CoreObject child_obj, CoreObject parent_obj)
+	{
+		if (this.mutex_objects) /* safe */
+		{
+			if (child_obj.parent != null)
+			{
+				child_obj.parent.childs.remove(child_obj);
+			}
+			
+			child_obj.parent = parent;
+			
+			if (parent_obj != null)
+			{
+				if (parent_obj.childs.indexOf(child_obj) == -1)
+				{
+					parent_obj.childs.push(child_obj);
+				}
+			}
+		}
+	}
+	
+}

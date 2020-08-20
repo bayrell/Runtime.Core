@@ -18,25 +18,11 @@
 
 namespace Runtime.Core;
 
-use Runtime.Context;
-use Runtime.CoreObject;
-use Runtime.rtl;
-use Runtime.RuntimeUtils;
-use Runtime.Vector;
+use Runtime.Core.CoreObject;
 
 
 class CoreDriver extends CoreObject
 {
-	
-	/**
-	 * Constructor
-	 */
-	public void constructor()
-	{
-		parent();
-	}
-	
-	
 	
 	/**
 	 * Start driver

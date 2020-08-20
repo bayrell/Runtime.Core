@@ -18,13 +18,9 @@
 
 namespace Runtime.Core;
 
-use Runtime.CoreObject;
-use Runtime.CoreStruct;
+use Runtime.BaseStruct;
 
 
-struct CoreEvent extends CoreStruct
+struct BaseEvent extends BaseStruct
 {
-	
-	public CoreObject sender = null;
-	
 }
