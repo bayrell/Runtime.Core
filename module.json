@@ -1,0 +1,17 @@
+{
+	"name": "Runtime.Core",
+	"files":
+	[
+		"Context",
+		"CoreObject",
+		"CoreDriver",
+		"CoreEvent",
+		"Entity",
+		"Driver",
+		"LambdaChain",
+		"LambdaChainDeclare",
+		"Message",
+		"ObjectManager",
+		"ModuleDescription"
+	]
+}

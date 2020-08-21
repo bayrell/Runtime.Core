@@ -220,7 +220,7 @@ struct Context extends BaseStruct implements ContextInterface
 		c <= entities <= entities;
 		
 		/* Extend entities */
-		entities = c.chain("Runtime.Entities", [c, entities]);
+		entities = c.chain("Runtime.Entities", [c, entities]) |> attr 1;
 		entities = static::extendEntities(c, entities);
 		entities = static::getRequiredEntities(entities);
 		
@@ -483,8 +483,7 @@ struct Context extends BaseStruct implements ContextInterface
 			string item_chain_name = item.chain;
 			if (item_chain_name != "")
 			{
-				var res = this.chain(item_chain_name, args);
-				args = args.setIm(args.count() - 1, res);
+				args = this.chain(item_chain_name, args);
 			}
 			else
 			{
@@ -492,12 +491,10 @@ struct Context extends BaseStruct implements ContextInterface
 				string class_name = arr.get(0, "");
 				string method_name = arr.get(1, "");
 				fn f = rtl::method(class_name, method_name);
-				var res = rtl::apply(f, args);
-				args = args.setIm(args.count() - 1, res);
+				args = rtl::apply(f, args);
 			}
 		}
-		var res = args.last();
-		return res;
+		return args;
 	}
 	
 	
@@ -524,8 +521,7 @@ struct Context extends BaseStruct implements ContextInterface
 			string item_chain_name = item.chain;
 			if (item_chain_name != "")
 			{
-				var res = await this.chainAwait(item_chain_name, args);
-				args = args.setIm(args.count() - 1, res);
+				args = await this.chainAwait(item_chain_name, args);
 			}
 			else
 			{
@@ -536,18 +532,15 @@ struct Context extends BaseStruct implements ContextInterface
 				
 				if (item.is_async)
 				{
-					var res = await rtl::apply(f, args);
-					args = args.setIm(args.count() - 1, res);
+					args = await rtl::apply(f, args);
 				}
 				else
 				{
-					var res = rtl::apply(f, args);
-					args = args.setIm(args.count() - 1, res);
+					args = rtl::apply(f, args);
 				}
 			}
 		}
-		var res = args.last();
-		return res;
+		return args;
 	}
 	
 	

@@ -70,7 +70,7 @@ class ObjectManager extends CoreObject
 	 */
 	void addObject(CoreObject obj, string object_name = "")
 	{
-		if (this.mutex_objects) /* safe */
+		safe (this.mutex_objects)
 		{
 			if (obj instanceof CoreObject)
 			{
@@ -92,7 +92,7 @@ class ObjectManager extends CoreObject
 	CoreObject getObject(string object_name)
 	{
 		CoreObject obj = null;
-		if (this.mutex_objects) /* safe */
+		safe (this.mutex_objects)
 		{
 			obj = this.objects.get(object_name, null);
 		}
@@ -107,7 +107,7 @@ class ObjectManager extends CoreObject
 	CoreDriver getDriver(string driver_name)
 	{
 		CoreObject obj = null;
-		if (this.mutex_objects) /* safe */
+		safe (this.mutex_objects)
 		{
 			obj = this.drivers.get(driver_name, null);
 		}
@@ -121,7 +121,7 @@ class ObjectManager extends CoreObject
 	 */
 	void removeObject(string object_name)
 	{
-		if (this.mutex_objects) /* safe */
+		safe (this.mutex_objects)
 		{
 			if (not this.drivers.has(object_name))
 			{
@@ -151,13 +151,13 @@ class ObjectManager extends CoreObject
 			if (class_name == "") class_name = driver_entity.name;
 			
 			CoreDriver driver = rtl::newInstance(class_name, []);
-			driver = @.chain(class_name, [driver]);
+			driver = @.chain(class_name, [driver]) |> attr 0;
 			if (class_name != driver_name)
 			{
-				driver = @.chain(driver_name, [driver]);
+				driver = @.chain(driver_name, [driver]) |> attr 0;
 			}
 			
-			if (this.mutex_objects) /* safe */
+			safe (this.mutex_objects)
 			{
 				this.objects.set(driver_name, driver);
 				this.drivers.set(driver_name, driver);
@@ -179,7 +179,7 @@ class ObjectManager extends CoreObject
 	 */ 
 	async void sendMessage(Message msg)
 	{
-		if (this.mutex_messages) /* safe */
+		safe (this.mutex_messages)
 		{
 			this.messages.push(msg);
 		}
@@ -238,7 +238,7 @@ class ObjectManager extends CoreObject
 		while (this.message.count() > 0)
 		{
 			Message msg = null;
-			if (this.mutex_messages) /* safe */
+			safe (this.mutex_messages)
 			{
 				msg = this.message.pop();
 			}
@@ -263,7 +263,7 @@ class ObjectManager extends CoreObject
 	 */
 	void setParent(CoreObject child_obj, CoreObject parent_obj)
 	{
-		if (this.mutex_objects) /* safe */
+		safe (this.mutex_objects)
 		{
 			if (child_obj.parent != null)
 			{
