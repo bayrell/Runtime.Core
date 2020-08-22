@@ -26,6 +26,9 @@ struct Entity extends BaseStruct
 {
 	string name = "";
 	string value = "";
+	Dict params = {};
+	
+	/* Functions */
 	string className() => this.value != "" ? this.value : this.name;
 	string logName() =>
 		this.getClassName() ~ " -> " ~ ( this.value != "" ? (this.name ~ " -> " ~ this.value) : this.name )

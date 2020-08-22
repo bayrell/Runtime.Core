@@ -28,6 +28,7 @@ use Runtime.Core.Driver;
 use Runtime.Core.Message;
 use Runtime.Core.RemoteCallEvent;
 use Runtime.Core.RemoteCallResponse;
+use Runtime.Exceptions.RuntimeException;
 
 
 class ObjectManager extends CoreObject
@@ -78,7 +79,7 @@ class ObjectManager extends CoreObject
 				if (not this.drivers.has(object_name))
 				{
 					this.objects.set(object_name, obj);
-					obj.manager = obj;
+					obj.manager = this;
 				}
 			}
 		}
@@ -137,6 +138,8 @@ class ObjectManager extends CoreObject
 	 */
 	async void startManager(Collection<BaseStruct> entities)
 	{
+		Vector<CoreObject> drivers_created = new Vector();
+		
 		Collection<BaseStruct> drivers = entities.filter
 		(
 			bool (BaseStruct item) => item instanceof Driver
@@ -150,11 +153,16 @@ class ObjectManager extends CoreObject
 			string class_name = driver_entity.value;
 			if (class_name == "") class_name = driver_entity.name;
 			
-			CoreDriver driver = rtl::newInstance(class_name, []);
+			CoreDriver driver = rtl::newInstance(class_name, [driver_name, driver_entity]);
 			driver = @.chain(class_name, [driver]) |> attr 0;
 			if (class_name != driver_name)
 			{
 				driver = @.chain(driver_name, [driver]) |> attr 0;
+			}
+			
+			if (driver == null)
+			{
+				throw new RuntimeException("Driver not found " ~ driver_name);
 			}
 			
 			safe (this.mutex_objects)
@@ -164,6 +172,13 @@ class ObjectManager extends CoreObject
 				driver.manager = this;
 			}
 			
+			drivers_created.push(driver);
+		}
+		
+		/* Start drivers */
+		for (int i=0; i<drivers_created.count(); i++)
+		{
+			CoreDriver driver = drivers_created.item(i);
 			await driver.startDriver();
 		}
 		
@@ -270,7 +285,7 @@ class ObjectManager extends CoreObject
 				child_obj.parent.childs.remove(child_obj);
 			}
 			
-			child_obj.parent = parent;
+			child_obj.parent = parent_obj;
 			
 			if (parent_obj != null)
 			{

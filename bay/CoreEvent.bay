@@ -21,6 +21,6 @@ namespace Runtime.Core;
 use Runtime.BaseStruct;
 
 
-struct BaseEvent extends BaseStruct
+struct CoreEvent extends BaseStruct
 {
 }
