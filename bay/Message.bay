@@ -20,17 +20,17 @@ namespace Runtime.Core;
 
 use Runtime.BaseObject;
 use Runtime.BaseStruct;
-use Runtime.Collection;
-use Runtime.Map;
+use Runtime.Core.CoreEvent;
 
 
 class Message<T> extends BaseObject
 {
+	protected string from = "";
 	protected string message_id = "";
 	protected string object_name = "";
 	protected bool is_cancel = false;
 	protected T data = null;
-	public Map tags = null;
+	public Map tags = new Map();
 	
 	
 	/**
@@ -49,6 +49,12 @@ class Message<T> extends BaseObject
 	void cancel()
 	{
 		this.is_cancel = true;
+		
+		if (this.data instanceof CoreEvent)
+		{
+			this.data = this.data::cancel(this.data);
+		}
+		
 	}
 	
 	
@@ -56,13 +62,14 @@ class Message<T> extends BaseObject
 	/** 
 	 * Constructor
 	 */
-	public void constructor(T data, string object_name = "", string message_id = "")
+	public void constructor(T data, string object_name = "", string from = "", string message_id = "")
 	{
 		parent();
 		
 		/* Set property */
 		this.data = data;
 		this.object_name = object_name;
+		this.from = from;
 		this.message_id = (message_id != "") ? message_id : rtl::unique();
 		this.tags = new Map();
 	}

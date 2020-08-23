@@ -162,7 +162,7 @@ class ObjectManager extends CoreObject
 			
 			if (driver == null)
 			{
-				throw new RuntimeException("Driver not found " ~ driver_name);
+				throw new RuntimeException("Driver not found " ~ class_name);
 			}
 			
 			safe (this.mutex_objects)
@@ -182,7 +182,7 @@ class ObjectManager extends CoreObject
 			await driver.startDriver();
 		}
 		
-		rtl::runThread( method this.processMessages );
+		/*rtl::runThread( method this.processMessages );*/
 	}
 	
 	
@@ -198,7 +198,10 @@ class ObjectManager extends CoreObject
 		{
 			this.messages.push(msg);
 		}
-		this.mutex_process.unlock();
+		this.mutex_process.unLock();
+		
+		/* Handle messages */
+		await this.handleMessages();
 	}
 	
 	
@@ -250,12 +253,12 @@ class ObjectManager extends CoreObject
 	 */
 	async void handleMessages()
 	{
-		while (this.message.count() > 0)
+		while (this.messages.count() > 0)
 		{
 			Message msg = null;
 			safe (this.mutex_messages)
 			{
-				msg = this.message.pop();
+				msg = this.messages.pop();
 			}
 			if (msg == null)
 			{

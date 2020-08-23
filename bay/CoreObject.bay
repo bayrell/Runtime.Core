@@ -27,7 +27,7 @@ use Runtime.Core.ObjectManager;
 class CoreObject extends BaseObject
 {
 	
-	protected string uq_object_name = "";
+	protected string object_name = "";
 	CoreObject parent = null;
 	Vector<CoreObject> childs = null;
 	ObjectManager manager = null;
@@ -37,7 +37,7 @@ class CoreObject extends BaseObject
 	/**
 	 * Returns object name
 	 */
-	public string getObjectName() => this.uq_object_name;
+	public string getObjectName() => this.object_name;
 	
 	
 	/**
@@ -56,7 +56,7 @@ class CoreObject extends BaseObject
 		this._init();
 		
 		/* Set object name */
-		this.uq_object_name = (object_name != "") ? object_name : this.getClassName() ~ "." ~ rtl::unique();
+		this.object_name = (object_name != "") ? object_name : this.getClassName() ~ "." ~ rtl::unique();
 		this.childs = new Vector<CoreObject>();
 		this.entity = entity;
 	}

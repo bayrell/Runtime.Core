@@ -23,4 +23,16 @@ use Runtime.BaseStruct;
 
 struct CoreEvent extends BaseStruct
 {
+	
+	/**
+	 * Check if event is cancel
+	 */
+	bool isCancel() => false;
+	
+	
+	/**
+	 * Cancel event
+	 */
+	pure CoreEvent cancel(CoreEvent event) => event;
+	
 }
