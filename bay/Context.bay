@@ -180,6 +180,9 @@ struct Context extends BaseStruct implements ContextInterface
 		c <= main_module <= main_module;
 		c <= main_class <= main_module_class_name;
 		
+		/* Set entry point */
+		c <= entry_point <= main_module_class_name;
+		
 		/* Set new settings */
 		c <= settings <= settings;
 		
