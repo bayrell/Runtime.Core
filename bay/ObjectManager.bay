@@ -39,6 +39,7 @@ class ObjectManager extends CoreObject
 	protected Mutex mutex_messages = null;
 	protected Mutex mutex_objects = null;
 	protected Mutex mutex_process = null;
+	protected Vector<Dict> listeners = null;
 	
 	
 	/**
@@ -61,6 +62,7 @@ class ObjectManager extends CoreObject
 		this.drivers.set(this.getClassName(), this);
 		this.objects.set("default:object_manager", this);
 		this.drivers.set("default:object_manager", this);
+		this.listeners = new Vector<Dict>();
 		this.manager = this;
 	}
 	
@@ -129,6 +131,58 @@ class ObjectManager extends CoreObject
 				this.objects.remove(object_name);
 			}
 		}
+	}
+	
+	
+	
+	/**
+	 * Register listener
+	 */
+	public void registerListener(string from, string event_class_name, string object_name, string method_name)
+	{
+		for (int i=0; i<this.listeners.count(); i++)
+		{
+			Dict item = this.listeners[i];
+			if (
+				item["from"] == from and
+				item["object_name"] == object_name and
+				item["method_name"] == method_name and
+				item["event_class_name"] == event_class_name
+			)
+			{
+				return;
+			}
+		}
+		this.listeners.push
+		{
+			"from": from,
+			"object_name": object_name,
+			"event_class_name": event_class_name,
+			"method_name": method_name,
+		};
+	}
+	
+	
+	
+	/**
+	 * Find callback
+	 */
+	public void findListeners(string from, string event_class_name = "")
+	{
+		Vector<Dict> items = new Vector();
+		for (int i=0; i<this.listeners.count(); i++)
+		{
+			Dict item = this.listeners[i];
+			if
+			(
+				item["from"] == from and
+				(event_class_name == "" or item["event_class_name"] == event_class_name)
+			)
+			{
+				items.push(item);
+			}
+		}
+		return items.toCollection();
 	}
 	
 	
@@ -265,11 +319,46 @@ class ObjectManager extends CoreObject
 				return;
 			}
 			
-			CoreObject obj = this.getObject(msg.object_name);
-			while (obj != null)
+			await this.handleMessage(msg);
+		}
+	}
+	
+	
+	
+	/**
+	 * Handle messages
+	 */
+	async void handleMessage(Message msg)
+	{
+		if (msg.data == null) return;
+		
+		Map<bool> hash = new Map();
+		Collection<Dict> items = this.findListeners(msg.from, msg.data.getClassName());
+		for (int i=0; i<items.count(); i++)
+		{
+			Dict item = items[i];
+			
+			string object_name = item["object_name"];
+			string method_name = item["method_name"];
+			
+			CoreObject obj = this.getObject(object_name);
+			if (obj != null)
 			{
-				await obj.handleMessage(msg);
-				obj = obj.parent;
+				if (rtl::method_exists(obj, method_name))
+				{
+					fn f = rtl::method(obj, method_name);
+					await f(msg);
+				}
+			}
+			
+			if (not hash.has(object_name))
+			{
+				while (obj != null)
+				{
+					await obj.handleMessage(msg);
+					obj = obj.parent;
+				}
+				hash.set(object_name, true);
 			}
 		}
 	}

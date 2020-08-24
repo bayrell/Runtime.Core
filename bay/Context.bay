@@ -348,6 +348,22 @@ struct Context extends BaseStruct implements ContextInterface
 	
 	
 	/**
+	 * Register listener
+	 */
+	void registerListener(string from, string event_class_name, string object_name, string method_name) =>
+		this.object_manager.registerListener(from, event_class_name, object_name, method_name);
+	
+	
+	
+	/**
+	 * Find listeners
+	 */
+	Collection<Dict> findListeners(string from, string event_class_name = "") =>
+		this.object_manager.findListeners(from, event_class_name);
+		
+	
+	
+	/**
 	 * Get object
 	 */
 	CoreObject getObject(string object_name) => this.object_manager.getObject(object_name);
