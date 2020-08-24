@@ -138,7 +138,7 @@ class ObjectManager extends CoreObject
 	/**
 	 * Register listener
 	 */
-	public void registerListener(string from, string event_class_name, string object_name, string method_name)
+	public void registerListener(string from, string event_class_name, string object_name, string method_name = "")
 	{
 		for (int i=0; i<this.listeners.count(); i++)
 		{
