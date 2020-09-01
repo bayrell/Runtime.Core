@@ -29,6 +29,6 @@ struct LambdaChain extends BaseStruct implements EntityInterface
 	string value = "";
 	string chain = "";
 	double pos = 0;
-	bool is_await = false;
+	bool is_async = false;
 	string logName() => this.getClassName() ~ " -> " ~ this.name ~ " -> [" ~ this.pos ~ "] " ~ this.value;
 }

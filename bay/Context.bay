@@ -323,10 +323,12 @@ struct Context extends BaseStruct implements ContextInterface
 	/**
 	 * Run application
 	 */
-	static async Context run(Context c)
+	static async Context run(Context c, fn f1 = null, fn f2 = null)
 	{
 		c = await static::appInit(c);
+		if (f1 != null) c = await f1(c);
 		c = await static::appStart(c);
+		if (f2 != null) c = await f2(c);
 		c = await static::appRun(c);
 		return c;
 	}
@@ -371,9 +373,23 @@ struct Context extends BaseStruct implements ContextInterface
 	
 	
 	/**
+	 * Get objects
+	 */
+	CoreObject getObjects(string object_name) => this.object_manager.getObjects(object_name);
+	
+	
+	
+	/**
 	 * Get driver
 	 */
 	CoreObject getDriver(string driver_name) => this.object_manager.getDriver(driver_name);
+	
+	
+	
+	/**
+	 * Get drivers
+	 */
+	CoreObject getDrivers(string class_name) => this.object_manager.getDrivers(class_name);
 	
 	
 	
@@ -489,7 +505,7 @@ struct Context extends BaseStruct implements ContextInterface
 			bool (BaseStruct item) use (chain_name) =>
 				item instanceof LambdaChain and
 				item.name == chain_name and
-				item.is_await == false
+				item.is_async == false
 		);
 		entities = entities.sortIm
 		(
@@ -521,7 +537,7 @@ struct Context extends BaseStruct implements ContextInterface
 	/**
 	 * Apply Lambda Chain Await
 	 */
-	async fn chainAwait(string chain_name, Collection args)
+	async fn chainAsync(string chain_name, Collection args)
 	{
 		Collection<BaseStruct> entities = this.entities.filter
 		(

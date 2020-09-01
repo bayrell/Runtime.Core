@@ -106,6 +106,27 @@ class ObjectManager extends CoreObject
 	
 	
 	/**
+	 * Get objects
+	 */
+	Collection<CoreDriver> getObjects(string class_name)
+	{
+		Vector<CoreDriver> objects = new Vector();
+		safe (this.mutex_objects)
+		{
+			this.objects.each
+			(
+				void (CoreDriver obj) use (objects, class_name)
+				{
+					if (rtl::is_instanceof(obj, class_name)) objects.push(obj);
+				}
+			);
+		}
+		return objects.toCollection();
+	}
+	
+	
+	
+	/**
 	 * Get driver
 	 */
 	CoreDriver getDriver(string driver_name)
@@ -116,6 +137,27 @@ class ObjectManager extends CoreObject
 			obj = this.drivers.get(driver_name, null);
 		}
 		return obj;
+	}
+	
+	
+	
+	/**
+	 * Get drivers
+	 */
+	Collection<CoreDriver> getDrivers(string class_name)
+	{
+		Vector<CoreDriver> drivers = new Vector();
+		safe (this.mutex_objects)
+		{
+			this.drivers.each
+			(
+				void (CoreDriver obj) use (drivers, class_name)
+				{
+					if (rtl::is_instanceof(obj, class_name)) drivers.push(obj);
+				}
+			);
+		}
+		return drivers.toCollection();
 	}
 	
 	
