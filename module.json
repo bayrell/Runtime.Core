@@ -1,6 +1,6 @@
 {
 	"name": "Runtime.Core",
-	"files":
+	"assets":
 	[
 		"Context",
 		"CoreObject",

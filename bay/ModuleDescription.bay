@@ -18,12 +18,7 @@
 
 namespace Runtime.Core;
 
-use Runtime.Annotations.Manager;
-use Runtime.Annotations.LambdaChain;
-use Runtime.Annotations.LambdaChainDeclare;
-use Runtime.Annotations.Provider;
 use Runtime.Interfaces.AssetsInterface;
-use Runtime.Interfaces.ContextInterface;
 use Runtime.Interfaces.ModuleDescriptionInterface;
 use Runtime.Web.RenderContainer;
 use Runtime.Web.RenderHelper;
@@ -47,7 +42,7 @@ class ModuleDescription implements
 	 * Returns module name
 	 * @return string
 	 */
-	pure string getModuleVersion() => "0.10.2";
+	pure string getModuleVersion() => "0.10.3";
 	
 	
 	
