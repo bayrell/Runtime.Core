@@ -30,7 +30,6 @@ use Runtime.Map;
 use Runtime.Vector;
 use Runtime.RuntimeUtils;
 use Runtime.Exceptions.RuntimeException;
-use Runtime.Interfaces.ContextInterface;
 use Runtime.Core.BusDriverInterface;
 use Runtime.Core.CoreObject;
 use Runtime.Core.Entity;
@@ -40,7 +39,7 @@ use Runtime.Core.ObjectManager;
 use Runtime.Core.RemoteCallResponse;
 
 
-struct Context extends BaseStruct implements ContextInterface
+struct Context extends BaseStruct
 {
 	/* Struct data */
 	string base_path = null;
@@ -162,8 +161,11 @@ struct Context extends BaseStruct implements ContextInterface
 		if (main_module)
 		{
 			main_module_class_name = main_module ~ ".ModuleDescription";
-			fn f = rtl::method(main_module_class_name, "appSettings");
-			settings = f(c.enviroments);
+			if (rtl::method_exists(main_module_class_name, "appSettings"))
+			{
+				fn f = rtl::method(main_module_class_name, "appSettings");
+				settings = f(c.enviroments);
+			}
 		}
 		
 		/* Add main module */

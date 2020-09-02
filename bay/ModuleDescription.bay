@@ -18,15 +18,8 @@
 
 namespace Runtime.Core;
 
-use Runtime.Interfaces.AssetsInterface;
-use Runtime.Interfaces.ModuleDescriptionInterface;
-use Runtime.Web.RenderContainer;
-use Runtime.Web.RenderHelper;
 
-
-class ModuleDescription implements 
-	ModuleDescriptionInterface,
-	AssetsInterface
+static class ModuleDescription
 {
 
 	
@@ -58,41 +51,10 @@ class ModuleDescription implements
 	
 	
 	/**
-	 * Returns module files load order
-	 * @return Collection<string>
-	 */
-	pure Collection<string> assets() => 
-	[
-		"Runtime.Core/Context",
-		"Runtime.Core/CoreDriver",
-		"Runtime.Core/CoreEvent",
-		"Runtime.Core/CoreProvider",
-		"Runtime.Core/Entity",
-		"Runtime.Core/Driver",
-		"Runtime.Core/LambdaChain",
-		"Runtime.Core/LambdaChainDeclare",
-		"Runtime.Core/Message",
-		"Runtime.Core/MessageRPC",
-		"Runtime.Core/MessageSession",
-		"Runtime.Core/ModuleDescription",
-		"Runtime.Core/Provider",
-	];
-	
-	
-	
-	/**
 	 * Returns enities
 	 */
 	pure Collection<Dict> entities() => 
 	[
 	];
-	
-	
-	
-	/**
-	 * Returns sync loaded files
-	 */		
-	pure Vector<string> resources() => null;
-	
 	
 }

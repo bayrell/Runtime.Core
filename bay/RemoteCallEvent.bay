@@ -27,4 +27,5 @@ struct RemoteCallEvent extends BaseEvent
 	string space_name = "";
 	string method_name = "";
 	primitive data = null;
+	Collection<primitive> storage = null;
 }

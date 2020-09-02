@@ -32,7 +32,7 @@ use Runtime.Core.RemoteCallResponse;
 use Runtime.Exceptions.RuntimeException;
 
 
-class ObjectManager extends CoreObject
+class ObjectManager extends BaseObject
 {
 	protected Map<CoreObject> objects = null;
 	protected Map<CoreObject> drivers = null;
