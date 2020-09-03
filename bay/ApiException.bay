@@ -18,14 +18,15 @@
  
 namespace Runtime.Core;
 
-use Runtime.Core.BaseEvent;
+use Runtime.Exceptions.RuntimeException;
 
 
-struct RemoteCallEvent extends BaseEvent
+class ApiException extends RuntimeException
 {
-	string object_name = "";
-	string space_name = "";
-	string method_name = "";
-	primitive data = null;
-	Collection<primitive> storage = null;
+	var response = null;
+	void constructor(string message = "", int code = -1, var response = null, Object prev = null)
+	{
+		parent(message, code, prev);
+		this.response = response;
+	}
 }

@@ -2,6 +2,8 @@
 	"name": "Runtime.Core",
 	"assets":
 	[
+		"ApiException",
+		"BusDriverInterface",
 		"Context",
 		"CoreObject",
 		"CoreDriver",
@@ -12,6 +14,8 @@
 		"LambdaChainDeclare",
 		"Message",
 		"ObjectManager",
+		"RemoteCallAnswer",
+		"RemoteCallRequest",
 		"ModuleDescription"
 	]
 }

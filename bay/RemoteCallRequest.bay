@@ -18,25 +18,15 @@
  
 namespace Runtime.Core;
 
-use Runtime.Core.Message;
-use Runtime.Core.RemoteCallAnswer;
+use Runtime.BaseStruct;
 
 
-interface BusDriverInterface
+struct RemoteCallRequest extends BaseStruct
 {
-	
-	/**
-	 * Send message
-	 * @return string
-	 */
-	async void sendMessage(Message msg);
-	
-	
-	
-	/**
-	 * Send message
-	 * @return string
-	 */
-	async RemoteCallAnswer remoteBusCall(Dict items);
-	
+	string app_name = "self";
+	string object_name = "";
+	string interface_name = "default";
+	string method_name = "";
+	primitive data = null;
+	Collection<primitive> storage = null;
 }

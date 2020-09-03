@@ -32,7 +32,7 @@ use Runtime.Core.RemoteCallResponse;
 use Runtime.Exceptions.RuntimeException;
 
 
-class ObjectManager extends BaseObject
+class ObjectManager extends CoreDriver
 {
 	protected Map<CoreObject> objects = null;
 	protected Map<CoreObject> drivers = null;
@@ -459,7 +459,7 @@ class ObjectManager extends BaseObject
 	/**
 	 * Set parent
 	 */
-	void setParent(CoreObject child_obj, CoreObject parent_obj)
+	void changeParent(CoreObject child_obj, CoreObject parent_obj)
 	{
 		safe (this.mutex_objects)
 		{

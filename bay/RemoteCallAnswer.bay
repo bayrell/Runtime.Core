@@ -25,17 +25,18 @@ use Runtime.Core.Message;
 use Runtime.Exceptions.RuntimeException;
 
 
-struct RemoteCallResponse extends BaseStruct
+struct RemoteCallAnswer extends BaseStruct
 {
 	/* Dest */
+	string app_name = "self";
 	string object_name = "";
-	string space_name = "";
+	string interface_name = "default";
 	string method_name = "";
 	
 	/* Result */
 	int code = 0;
 	string success_message = "";
-	string error = "";
+	string error_message = "";
 	string error_name = "";
 	string error_trace = "";
 	Collection<string> logs = null;	
@@ -62,7 +63,7 @@ struct RemoteCallResponse extends BaseStruct
 		msg.copy
 		{
 			"code": code,
-			"error": "",
+			"error_message": "",
 			"success_message": message,
 			"response": response,
 		}
@@ -79,7 +80,7 @@ struct RemoteCallResponse extends BaseStruct
 		msg.copy
 		{
 			"code": code,
-			"error": error,
+			"error_message": error,
 			"error_name": error_name,
 			"response": response,
 		}
@@ -97,7 +98,7 @@ struct RemoteCallResponse extends BaseStruct
 		msg = msg.copy
 		{
 			"code": e.getErrorCode(),
-			"error": e.getErrorMessage(),
+			"error_message": e.getErrorMessage(),
 			"error_name": e.getClassName(),
 			"response": null,
 		};
@@ -122,7 +123,7 @@ struct RemoteCallResponse extends BaseStruct
 		(
 			new Message
 			{
-				"error": m.err.getErrorMessage(),
+				"error_message": m.err.getErrorMessage(),
 				"error_name": m.err.getClassName(),
 				"code": m.err.getErrorCode(),
 				"response": m.err,

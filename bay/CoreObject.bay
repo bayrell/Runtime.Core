@@ -77,6 +77,6 @@ class CoreObject extends BaseObject
 	 */
 	void setParent(CoreObject parent_obj)
 	{
-		this.manager.setParent(this, parent_obj);
+		this.manager.changeParent(this, parent_obj);
 	}
 }

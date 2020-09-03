@@ -36,7 +36,7 @@ use Runtime.Core.Entity;
 use Runtime.Core.LambdaChain;
 use Runtime.Core.Message;
 use Runtime.Core.ObjectManager;
-use Runtime.Core.RemoteCallResponse;
+use Runtime.Core.RemoteCallAnswer;
 
 
 struct Context extends BaseStruct
@@ -414,9 +414,9 @@ struct Context extends BaseStruct
 	/**
 	 * Remote call
 	 * @param Dict items
-	 * @return RemoteCallResponse
+	 * @return RemoteCallAnswer
 	 */
-	async RemoteCallResponse remoteLocalCall(Dict items) => await this.object_manager.remoteCall(items);
+	async RemoteCallAnswer remoteLocalCall(Dict items) => await this.object_manager.remoteCall(items);
 	
 	
 	
@@ -436,9 +436,9 @@ struct Context extends BaseStruct
 	/**
 	 * Remote call
 	 * @param Dict items
-	 * @return RemoteCallResponse
+	 * @return RemoteCallAnswer
 	 */
-	async RemoteCallResponse remoteBusCall(Dict items)
+	async RemoteCallAnswer remoteBusCall(Dict items)
 	{
 		BusDriverInterface driver = this.getDriver("default:external_bus");
 		return await driver.remoteCall(items);
@@ -479,9 +479,9 @@ struct Context extends BaseStruct
 	/**
 	 * Remote call
 	 * @param Dict items
-	 * @return RemoteCallResponse
+	 * @return RemoteCallAnswer
 	 */
-	async RemoteCallResponse remoteSystemCall(Dict items)
+	async RemoteCallAnswer remoteSystemCall(Dict items)
 	{
 		BusDriverInterface driver = this.getDriver("default:system_bus");
 		await driver.remoteCall(items);
