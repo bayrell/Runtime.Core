@@ -46,11 +46,20 @@ struct RemoteCallAnswer extends BaseStruct
 	primitive response = null;
 	
 	
+	
 	/**
 	 * Returns true if success
 	 * @return bool
 	 */
-	pure bool isSuccess(Message msg) => msg.have_answer and msg.code >= rtl::ERROR_OK;
+	bool isSuccess() => this.have_answer and this.code >= rtl::ERROR_OK;
+	
+	
+	
+	/**
+	 * Returns true if success
+	 * @return bool
+	 */
+	bool getMessage() => this.isSuccess() ? this.success_message : this.error_message;
 	
 	
 	

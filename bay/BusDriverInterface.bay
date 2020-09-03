@@ -20,6 +20,7 @@ namespace Runtime.Core;
 
 use Runtime.Core.Message;
 use Runtime.Core.RemoteCallAnswer;
+use Runtime.Core.RemoteCallRequest;
 
 
 interface BusDriverInterface
@@ -37,6 +38,6 @@ interface BusDriverInterface
 	 * Send message
 	 * @return string
 	 */
-	async RemoteCallAnswer remoteBusCall(Dict items);
+	async RemoteCallAnswer remoteBusCall(RemoteCallRequest request);
 	
 }
