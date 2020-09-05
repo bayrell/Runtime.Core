@@ -25,6 +25,7 @@ use Runtime.Core.CoreEvent;
 
 class Message<T> extends BaseObject
 {
+	protected var sender = null;
 	protected string from = "";
 	protected string message_id = "";
 	protected bool is_cancel = false;

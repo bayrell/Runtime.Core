@@ -75,6 +75,7 @@ struct RemoteCallAnswer extends BaseStruct
 			"error_message": "",
 			"success_message": message,
 			"response": response,
+			"have_answer": true,
 		}
 	;
 	
@@ -92,6 +93,7 @@ struct RemoteCallAnswer extends BaseStruct
 			"error_message": error,
 			"error_name": error_name,
 			"response": response,
+			"have_answer": true,
 		}
 	;
 	
@@ -110,6 +112,7 @@ struct RemoteCallAnswer extends BaseStruct
 			"error_message": e.getErrorMessage(),
 			"error_name": e.getClassName(),
 			"response": null,
+			"have_answer": true,
 		};
 		
 		if (e instanceof ApiException)
