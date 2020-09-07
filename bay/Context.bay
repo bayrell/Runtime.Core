@@ -664,9 +664,12 @@ struct Context extends BaseStruct
 		for (int i=0; i<modules.count(); i++)
 		{
 			string module_class_name = modules.item(i) ~ ".ModuleDescription";
-			fn f = rtl::method(module_class_name, "entities");
-			Collection<BaseStruct> arr = f();
-			entities.appendVector(arr);
+			if (rtl::method_exists(module_class_name, "entities"))
+			{
+				fn f = rtl::method(module_class_name, "entities");
+				Collection<BaseStruct> arr = f();
+				entities.appendVector(arr);
+			}
 		}
 		return entities.toCollection();
 	}

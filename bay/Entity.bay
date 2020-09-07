@@ -29,7 +29,7 @@ struct Entity extends BaseStruct
 	Dict params = {};
 	
 	/* Functions */
-	string className() => this.value != "" ? this.value : this.name;
+	string className() => this.name != "" ? (this.value != "" ? this.value : this.name) : "";
 	string logName() =>
 		this.getClassName() ~ " -> " ~ ( this.value != "" ? (this.name ~ " -> " ~ this.value) : this.name )
 	;
