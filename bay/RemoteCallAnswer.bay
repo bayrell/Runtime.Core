@@ -68,8 +68,8 @@ struct RemoteCallAnswer extends BaseStruct
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure fn success(Message msg, primitive response, string message = "", int code = 1) =>
-		msg.copy
+	pure RemoteCallAnswer success(RemoteCallAnswer answer, primitive response, string message = "", int code = 1) =>
+		answer.copy
 		{
 			"code": code,
 			"error_message": "",
@@ -86,8 +86,8 @@ struct RemoteCallAnswer extends BaseStruct
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure fn fail(Message msg, primitive response, string error = "", int code = -1, string error_name = "") =>
-		msg.copy
+	pure RemoteCallAnswer fail(RemoteCallAnswer answer, primitive response, string error = "", int code = -1, string error_name = "") =>
+		answer.copy
 		{
 			"code": code,
 			"error_message": error,
@@ -104,9 +104,9 @@ struct RemoteCallAnswer extends BaseStruct
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure fn exception(Message msg, RuntimeException e)
+	pure RemoteCallAnswer exception(RemoteCallAnswer answer, RuntimeException e)
 	{
-		msg = msg.copy
+		answer = answer.copy
 		{
 			"code": e.getErrorCode(),
 			"error_message": e.getErrorMessage(),
@@ -117,10 +117,10 @@ struct RemoteCallAnswer extends BaseStruct
 		
 		if (e instanceof ApiException)
 		{
-			msg <= response <= e.response;
+			answer <= response <= e.response;
 		}
 		
-		return msg;
+		return answer;
 	}
 	
 	
