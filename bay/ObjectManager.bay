@@ -307,7 +307,7 @@ class ObjectManager extends CoreDriver
 			
 			if (driver == null)
 			{
-				throw new RuntimeException("Driver not found " ~ class_name);
+				throw new RuntimeException("Driver '" ~ class_name ~ "' not found");
 			}
 			
 			safe (this.mutex_objects)
