@@ -89,7 +89,7 @@ struct Context extends BaseStruct
 	/**
 	 * Returns enviroment by eky
 	 */
-	fn env(string key, var def_value = "") =>
+	var env(string key, var def_value = "") =>
 		this
 		|> attr "enviroments"
 		|> lib::get(key, def_value)
@@ -101,7 +101,7 @@ struct Context extends BaseStruct
 	 * Returns settings
 	 * @return Dict<string>
 	 */
-	fn config(Collection items, primitive d = null) =>
+	var config(Collection items, primitive d = null) =>
 		this
 		|> attr "settings"
 		|> lib::get("config", null)
@@ -113,9 +113,10 @@ struct Context extends BaseStruct
 	/**
 	 * Returns docker secret key
 	 */
-	fn secret(string key) =>
+	var secret(string key) =>
 		this
 		|> attr "settings"
+		|> lib::get("secrets", null)
 		|> lib::get(key, "")
 	;
 	

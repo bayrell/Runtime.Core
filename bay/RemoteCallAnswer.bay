@@ -45,6 +45,10 @@ struct RemoteCallAnswer extends BaseStruct
 	/* Data */
 	primitive response = null;
 	
+	/* Backend */
+	Dict<var> new_cookies = {};
+	Collection<string> new_headers = [];
+	int new_http_code = 200;
 	
 	
 	/**
@@ -68,7 +72,8 @@ struct RemoteCallAnswer extends BaseStruct
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure RemoteCallAnswer success(RemoteCallAnswer answer, primitive response, string message = "", int code = 1) =>
+	pure RemoteCallAnswer success
+	(RemoteCallAnswer answer, primitive response = null, string message = "", int code = 1) =>
 		answer.copy
 		{
 			"code": code,
@@ -142,5 +147,25 @@ struct RemoteCallAnswer extends BaseStruct
 			}
 		);
 	}
+	
+	
+	
+	#ifdef BACKEND then
+	
+	/**
+	 * Add cookie
+	 */
+	pure RemoteCallAnswer addCookie(RemoteCallAnswer answer, var cookie)
+	{
+		string cookie_name = cookie["name"];
+		if (answer.new_cookies == null)
+		{
+			answer <= new_cookies <= new Dict();
+		}
+		answer <= new_cookies <= answer.new_cookies.setIm(cookie_name, cookie);
+		return answer;
+	}
+	
+	#endif
 	
 }
