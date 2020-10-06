@@ -29,6 +29,7 @@ use Runtime.Dict;
 use Runtime.Map;
 use Runtime.Vector;
 use Runtime.RuntimeUtils;
+use Runtime.Exceptions.FileNotFound;
 use Runtime.Exceptions.RuntimeException;
 use Runtime.Core.BusDriverInterface;
 use Runtime.Core.CoreObject;
@@ -703,6 +704,10 @@ struct Context extends BaseStruct
 							e.push(item2);
 						}
 					}
+				}
+				else
+				{
+					throw new FileNotFound(class_name, "Entity");
 				}
 			}	
 		}
