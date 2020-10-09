@@ -54,6 +54,7 @@ struct Context extends BaseStruct
 	bool initialized = false;
 	bool started = false;
 	int start_time = 0;
+	string tz = "UTC";
 	
 	/* Entrypoint and main class */
 	string entry_point = "";
@@ -140,7 +141,7 @@ struct Context extends BaseStruct
 			"enviroments": env,
 			"settings": settings,
 			"modules": [],
-			"object_manager": new ObjectManager(),
+			"object_manager": new ObjectManager(classof ObjectManager),
 		};
 		
 		/* Create context */

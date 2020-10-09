@@ -26,6 +26,7 @@ use Runtime.Core.CoreDriver;
 use Runtime.Core.CoreEvent;
 use Runtime.Core.CoreObject;
 use Runtime.Core.Driver;
+use Runtime.Core.Entity;
 use Runtime.Core.Message;
 use Runtime.Core.RemoteCallEvent;
 use Runtime.Core.RemoteCallResponse;
@@ -46,9 +47,9 @@ class ObjectManager extends CoreDriver
 	/**
 	 * Constructor
 	 */
-	void constructor()
+	void constructor(string object_name = "", Entity entity = null)
 	{
-		parent();
+		parent(object_name, entity);
 		
 		/* Create object */
 		this.objects = new Map<CoreObject>();

@@ -56,7 +56,7 @@ class CoreObject extends BaseObject
 		this._init();
 		
 		/* Set object name */
-		this.object_name = (object_name != "") ? object_name : this.getClassName() ~ "." ~ rtl::unique();
+		this.object_name = (object_name != "") ? object_name : this.getClassName() ~ "." ~ rtl::uid();
 		this.childs = new Vector<CoreObject>();
 		this.entity = entity;
 	}
