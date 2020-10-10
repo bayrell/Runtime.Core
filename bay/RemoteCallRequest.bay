@@ -28,5 +28,5 @@ struct RemoteCallRequest extends BaseStruct
 	string interface_name = "default";
 	string method_name = "";
 	primitive data = null;
-	Collection<primitive> storage = null;
+	Dict<primitive> storage = null;
 }
