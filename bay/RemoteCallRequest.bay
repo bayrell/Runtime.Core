@@ -23,6 +23,7 @@ use Runtime.BaseStruct;
 
 struct RemoteCallRequest extends BaseStruct
 {
+	string uri = "";
 	string app_name = "self";
 	string object_name = "";
 	string interface_name = "default";
