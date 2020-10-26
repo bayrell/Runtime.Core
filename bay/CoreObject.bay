@@ -19,19 +19,17 @@
 namespace Runtime.Core;
 
 use Runtime.BaseObject;
-use Runtime.Core.Entity;
 use Runtime.Core.Message;
 use Runtime.Core.ObjectManager;
 
 
 class CoreObject extends BaseObject
 {
-	
 	protected string object_name = "";
 	CoreObject parent = null;
 	Vector<CoreObject> childs = null;
 	ObjectManager manager = null;
-	Entity entity = null;
+	
 	
 	
 	/**
@@ -40,17 +38,11 @@ class CoreObject extends BaseObject
 	public string getObjectName() => this.object_name;
 	
 	
-	/**
-	 * Returns entity
-	 */
-	public string getEntity() => this.entity;
-	
-	
 	
 	/** 
 	 * Constructor
 	 */
-	public void constructor(string object_name = "", Entity entity = null)
+	public void constructor(string object_name = "")
 	{		
 		/* Init object */
 		this._init();
@@ -58,7 +50,6 @@ class CoreObject extends BaseObject
 		/* Set object name */
 		this.object_name = (object_name != "") ? object_name : this.getClassName() ~ "." ~ rtl::uid();
 		this.childs = new Vector<CoreObject>();
-		this.entity = entity;
 	}
 	
 	

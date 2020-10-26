@@ -19,10 +19,30 @@
 namespace Runtime.Core;
 
 use Runtime.Core.CoreObject;
+use Runtime.Core.Entity;
 
 
 class CoreDriver extends CoreObject
 {
+	
+	Entity entity = null;
+	
+	
+	/**
+	 * Returns entity
+	 */
+	public string getEntity() => this.entity;
+	
+	
+	/**
+	 * Constructor
+	 */
+	public void constructor(string object_name = "", Entity entity = null)
+	{
+		parent(object_name);
+		this.entity = entity;
+	}
+	
 	
 	/**
 	 * Start driver
