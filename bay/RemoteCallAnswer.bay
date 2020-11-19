@@ -21,6 +21,7 @@ namespace Runtime.Core;
 use Runtime.BaseStruct;
 use Runtime.Monad;
 use Runtime.Core.ApiException;
+use Runtime.Core.Cookie;
 use Runtime.Core.Message;
 use Runtime.Exceptions.RuntimeException;
 
@@ -42,11 +43,11 @@ struct RemoteCallAnswer extends BaseStruct
 	Collection<string> logs = null;	
 	bool have_answer = false;
 	
-	/* Data */
+	/* Answer data */
 	primitive response = null;
 	
-	/* Backend */
-	Dict<var> new_cookies = {};
+	/* Web headers */
+	Dict<Cookie> new_cookies = {};
 	Collection<string> new_headers = [];
 	int new_http_code = 200;
 	
@@ -91,7 +92,8 @@ struct RemoteCallAnswer extends BaseStruct
 	 * @param primitive res
 	 * @return Message
 	 */
-	pure RemoteCallAnswer fail(RemoteCallAnswer answer, primitive response, string error = "", int code = -1, string error_name = "") =>
+	pure RemoteCallAnswer fail
+	(RemoteCallAnswer answer, primitive response, string error = "", int code = -1, string error_name = "") =>
 		answer.copy
 		{
 			"code": code,
@@ -150,8 +152,6 @@ struct RemoteCallAnswer extends BaseStruct
 	
 	
 	
-	#ifdef BACKEND then
-	
 	/**
 	 * Add cookie
 	 */
@@ -165,7 +165,5 @@ struct RemoteCallAnswer extends BaseStruct
 		answer <= new_cookies <= answer.new_cookies.setIm(cookie_name, cookie);
 		return answer;
 	}
-	
-	#endif
 	
 }

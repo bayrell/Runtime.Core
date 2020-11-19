@@ -5,6 +5,7 @@
 		"ApiException",
 		"BusDriverInterface",
 		"Context",
+		"Cookie",
 		"CoreObject",
 		"CoreDriver",
 		"CoreEvent",
@@ -16,6 +17,8 @@
 		"ObjectManager",
 		"RemoteCallAnswer",
 		"RemoteCallRequest",
+		"Request",
+		"Response",
 		"ModuleDescription"
 	]
 }
