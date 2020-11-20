@@ -60,10 +60,10 @@ class ObjectManager extends CoreDriver
 		this.mutex_process = new Mutex();
 		
 		/* Register self */
-		this.objects.set(this.getClassName(), this);
-		this.drivers.set(this.getClassName(), this);
-		this.objects.set("default:object_manager", this);
-		this.drivers.set("default:object_manager", this);
+		this.objects.setValue(this.getClassName(), this);
+		this.drivers.setValue(this.getClassName(), this);
+		this.objects.setValue("default:object_manager", this);
+		this.drivers.setValue("default:object_manager", this);
 		this.listeners = new Vector<Dict>();
 		this.manager = this;
 	}
@@ -82,7 +82,7 @@ class ObjectManager extends CoreDriver
 				if (object_name == "") object_name = obj.getObjectName();
 				if (not this.drivers.has(object_name))
 				{
-					this.objects.set(object_name, obj);
+					this.objects.setValue(object_name, obj);
 					obj.manager = this;
 				}
 			}
@@ -118,7 +118,7 @@ class ObjectManager extends CoreDriver
 			(
 				void (CoreDriver obj) use (objects, class_name)
 				{
-					if (rtl::is_instanceof(obj, class_name)) objects.push(obj);
+					if (rtl::is_instanceof(obj, class_name)) objects.pushValue(obj);
 				}
 			);
 		}
@@ -154,7 +154,7 @@ class ObjectManager extends CoreDriver
 			(
 				void (CoreDriver obj) use (drivers, class_name)
 				{
-					if (rtl::is_instanceof(obj, class_name)) drivers.push(obj);
+					if (rtl::is_instanceof(obj, class_name)) drivers.pushValue(obj);
 				}
 			);
 		}
@@ -271,7 +271,7 @@ class ObjectManager extends CoreDriver
 				(event_class_name == "" or item["event_class_name"] == event_class_name)
 			)
 			{
-				items.push(item);
+				items.pushValue(item);
 			}
 		}
 		return items.toCollection();
@@ -313,12 +313,12 @@ class ObjectManager extends CoreDriver
 			
 			safe (this.mutex_objects)
 			{
-				this.objects.set(driver_name, driver);
-				this.drivers.set(driver_name, driver);
+				this.objects.setValue(driver_name, driver);
+				this.drivers.setValue(driver_name, driver);
 				driver.manager = this;
 			}
 			
-			drivers_created.push(driver);
+			drivers_created.pushValue(driver);
 		}
 		
 		/* Start drivers */
@@ -342,7 +342,7 @@ class ObjectManager extends CoreDriver
 	{
 		safe (this.mutex_messages)
 		{
-			this.messages.push(msg);
+			this.messages.pushValue(msg);
 		}
 		this.mutex_process.unLock();
 		
@@ -450,7 +450,7 @@ class ObjectManager extends CoreDriver
 					await obj.handleMessage(msg);
 					obj = obj.parent;
 				}
-				hash.set(object_name, true);
+				hash.setValue(object_name, true);
 			}
 		}
 	}
@@ -466,7 +466,7 @@ class ObjectManager extends CoreDriver
 		{
 			if (child_obj.parent != null)
 			{
-				child_obj.parent.childs.remove(child_obj);
+				child_obj.parent.childs.vectorRemoveValue(child_obj);
 			}
 			
 			child_obj.parent = parent_obj;
@@ -475,7 +475,7 @@ class ObjectManager extends CoreDriver
 			{
 				if (parent_obj.childs.indexOf(child_obj) == -1)
 				{
-					parent_obj.childs.push(child_obj);
+					parent_obj.childs.pushValue(child_obj);
 				}
 			}
 		}

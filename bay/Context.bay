@@ -627,7 +627,7 @@ struct Context extends BaseStruct
 			string module_name = modules.item(i);
 			if (cache.get(module_name, false) == false)
 			{
-				cache.set(module_name, true);
+				cache.setValue(module_name, true);
 				fn f = rtl::method(module_name ~ ".ModuleDescription", "requiredModules");
 				Dict<string> sub_modules = f();
 				if (sub_modules != null)
@@ -635,7 +635,7 @@ struct Context extends BaseStruct
 					Collection<string> sub_modules = sub_modules.keys();
 					static::_getRequiredModules(res, cache, sub_modules);
 				}
-				res.push(module_name);
+				res.pushValue(module_name);
 			}
 		}
 	}
@@ -652,7 +652,7 @@ struct Context extends BaseStruct
 		Vector<string> res = new Vector();
 		Map<string> cache = new Map();
 		static::_getRequiredModules(res, cache, modules);
-		res = res.removeDublicatesIm();
+		res = res.removeDuplicates();
 		return res.toCollection();
 	}
 	
@@ -702,7 +702,7 @@ struct Context extends BaseStruct
 						if (item2 instanceof Entity and item2_class_name != "Runtime.Core.Entity")
 						{
 							item2 = item2.copy({ "name": class_name });
-							e.push(item2);
+							e.pushValue(item2);
 						}
 					}
 				}
