@@ -175,10 +175,10 @@ class ObjectManager extends CoreDriver
 				CoreObject obj = this.objects.get(object_name, null);
 				if (obj != null and obj.parent != null)
 				{
-					obj.parent.childs.remove(obj);
+					obj.parent.childs.removeValue(obj);
 					obj.parent = null;
 				}
-				this.objects.remove(object_name);
+				this.objects.removeValue(object_name);
 			}
 		}
 	}
@@ -220,7 +220,7 @@ class ObjectManager extends CoreDriver
 				rs::strpos(item["object_name"], object_name) == 0
 			)
 			{
-				this.listeners.remove(i);
+				this.listeners.removeValue(i);
 			}
 		}
 	}
@@ -245,7 +245,7 @@ class ObjectManager extends CoreDriver
 				return;
 			}
 		}
-		this.listeners.push
+		this.listeners.pushValue
 		{
 			"from": from,
 			"object_name": object_name,
@@ -466,7 +466,7 @@ class ObjectManager extends CoreDriver
 		{
 			if (child_obj.parent != null)
 			{
-				child_obj.parent.childs.vectorRemoveValue(child_obj);
+				child_obj.parent.childs.removeValue(child_obj);
 			}
 			
 			child_obj.parent = parent_obj;
