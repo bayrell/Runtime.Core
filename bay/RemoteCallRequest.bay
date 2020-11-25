@@ -30,6 +30,4 @@ struct RemoteCallRequest extends BaseStruct
 	string method_name = "";
 	primitive data = null;
 	Dict<primitive> storage = null;
-	string sign = "";
-	int time = 0;
 }
