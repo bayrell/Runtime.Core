@@ -353,8 +353,12 @@ struct Context extends BaseStruct
 	/**
 	 * Register listener
 	 */
-	void registerListener(string from, string event_class_name, string object_name, string method_name = "") =>
-		this.object_manager.registerListener(from, event_class_name, object_name, method_name);
+	void registerListener(string from, string event_class_name,
+		string object_name, string method_name = "") =>
+			this.object_manager.registerListener(
+				from, event_class_name,
+				object_name, method_name
+			);
 	
 	
 	
@@ -627,7 +631,7 @@ struct Context extends BaseStruct
 			string module_name = modules.item(i);
 			if (cache.get(module_name, false) == false)
 			{
-				cache.set(module_name, true);
+				cache.setValue(module_name, true);
 				fn f = rtl::method(module_name ~ ".ModuleDescription", "requiredModules");
 				Dict<string> sub_modules = f();
 				if (sub_modules != null)
@@ -635,7 +639,7 @@ struct Context extends BaseStruct
 					Collection<string> sub_modules = sub_modules.keys();
 					static::_getRequiredModules(res, cache, sub_modules);
 				}
-				res.push(module_name);
+				res.pushValue(module_name);
 			}
 		}
 	}
@@ -652,7 +656,7 @@ struct Context extends BaseStruct
 		Vector<string> res = new Vector();
 		Map<string> cache = new Map();
 		static::_getRequiredModules(res, cache, modules);
-		res = res.removeDublicatesIm();
+		res = res.removeDuplicatesIm();
 		return res.toCollection();
 	}
 	
@@ -702,7 +706,7 @@ struct Context extends BaseStruct
 						if (item2 instanceof Entity and item2_class_name != "Runtime.Core.Entity")
 						{
 							item2 = item2.copy({ "name": class_name });
-							e.push(item2);
+							e.pushValue(item2);
 						}
 					}
 				}
@@ -721,5 +725,66 @@ struct Context extends BaseStruct
 	 * Extends entities
 	 */
 	pure Collection<BaseStruct> extendEntities(Context c, Collection<BaseStruct> entities) => entities;
+	
+	
+	
+	/**
+	 * Returns sub entities from classes
+	 */
+	pure Collection getSubEntities
+	(
+		Collection entitites,
+		string entity_class_name,
+		string entity_class_method
+	)
+	{
+		Collection class_names = entitites.filter( lib::isInstance(entity_class_name) );
+		
+		Vector<BaseStruct> methods = new Vector();
+		methods.appendVector( entitites.filter( lib::isInstance(entity_class_method) ) );
+		
+		for (int class_names_inc=0; class_names_inc<class_names.count(); class_names_inc++)
+		{
+			Entity class_item = class_names[class_names_inc];
+			string class_name = class_item.name;
+			if (class_name == "") continue;
+			
+			Dict annotations = rtl::getMethodsAnnotations(class_name);
+			annotations.each
+			(
+				void (Collection annotations, string class_method_name) use
+				(methods, class_item, class_name, entity_class_name, entity_class_method)
+				{
+					Dict method_info = rtl::methodApply
+					(
+						class_name,
+						"getMethodInfoByName",
+						[class_method_name]
+					);
+					for (int annotations_inc=0; annotations_inc<annotations.count(); annotations_inc++)
+					{
+						BaseStruct annotation = annotations[annotations_inc];
+						if (annotation)
+						{
+							if (rtl::is_instanceof(annotation, entity_class_method))
+							{
+								annotation = annotation.addMethodInfo
+								(
+									class_name,
+									class_method_name,
+									class_item,
+									method_info
+								);
+								methods.pushValue(annotation);
+							}
+						}
+					}
+				}
+			);
+			
+		}
+		
+		return methods;
+	}
 	
 }
